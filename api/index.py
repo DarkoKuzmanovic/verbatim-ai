@@ -347,4 +347,8 @@ async def test_endpoint():
     }
 
 # This is required for Vercel deployment
-handler = app
+# Vercel-compatible handler
+from mangum import Mangum
+
+# Create the handler for Vercel
+handler = Mangum(app, lifespan="off")
