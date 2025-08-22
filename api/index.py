@@ -251,5 +251,7 @@ async def test_endpoint():
     }
 
 # Vercel handler
-from mangum import Mangum
-handler = Mangum(app, lifespan="off")
+
+# For Vercel, export the FastAPI app directly
+# Mangum handler is only needed for AWS Lambda
+# Vercel expects an ASGI app, not a Lambda handler
