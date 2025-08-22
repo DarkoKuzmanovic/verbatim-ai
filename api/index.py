@@ -347,8 +347,31 @@ async def test_endpoint():
     }
 
 # This is required for Vercel deployment
-# Vercel-compatible handler
-from mangum import Mangum
-
-# Create the handler for Vercel
-handler = Mangum(app, lifespan="off")
+# Import Mangum at module level to avoid inspection issues
+try:
+    from mangum import Mangum
+    # Create the handler with explicit configuration
+    handler = Mangum(
+        app,
+        lifespan="off",
+        api_gateway_base_path=None,
+        text_mime_types=[
+            "application/json",
+            "application/javascript",
+            "application/xml",
+            "application/vnd.api+json",
+            "text/css",
+            "text/html",
+            "text/plain",
+        ],
+    )
+    logger.info("Successfully created Mangum handler with explicit config")
+except Exception as e:
+    logger.error(f"Failed to create Mangum handler: {e}")
+    # Simple fallback that should work with Vercel
+    def handler(event, context):
+        logger.error("Using fallback handler due to Mangum failure")
+        return {
+            'statusCode': 500,
+            'body': 'Handler initialization failed'
+        }
