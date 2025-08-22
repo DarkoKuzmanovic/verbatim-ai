@@ -5,8 +5,10 @@ from typing import Optional
 import os
 import logging
 from dotenv import load_dotenv
+import sys
+from pathlib import Path
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
 
 # Set up logging
@@ -16,108 +18,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Import from parent directory with robust error handling
-import sys
-import os
-import importlib.util
-import pathlib
-
-# Add parent directory to path
-parent_dir = pathlib.Path(__file__).parent.parent
+# Add parent directory to path for imports
+parent_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(parent_dir))
 
-# Initialize module variables
-Config = None
-YouTubeTranscriptFetcher = None
-LLMFormatter = None
-
 try:
-    # Try direct imports first
     from config import Config
     from utils.youtube import YouTubeTranscriptFetcher
     from utils.llm import LLMFormatter
-    logger.info("Successfully imported modules using direct imports")
+    logger.info("Successfully imported all modules")
 except ImportError as e:
-    logger.warning(f"Direct import failed: {e}. Trying fallback method...")
-    try:
-        # Fallback: Load modules using importlib
-        config_spec = importlib.util.spec_from_file_location("config", parent_dir / "config.py")
-        if config_spec and config_spec.loader:
-            config_module = importlib.util.module_from_spec(config_spec)
-            config_spec.loader.exec_module(config_module)
-            Config = config_module.Config
-        
-        youtube_spec = importlib.util.spec_from_file_location("youtube", parent_dir / "utils" / "youtube.py")
-        if youtube_spec and youtube_spec.loader:
-            youtube_module = importlib.util.module_from_spec(youtube_spec)
-            youtube_spec.loader.exec_module(youtube_module)
-            YouTubeTranscriptFetcher = youtube_module.YouTubeTranscriptFetcher
-        
-        llm_spec = importlib.util.spec_from_file_location("llm", parent_dir / "utils" / "llm.py")
-        if llm_spec and llm_spec.loader:
-            llm_module = importlib.util.module_from_spec(llm_spec)
-            llm_spec.loader.exec_module(llm_module)
-            LLMFormatter = llm_module.LLMFormatter
-        
-        logger.info("Successfully imported modules using fallback method")
-    except Exception as fallback_error:
-        logger.error(f"Both import methods failed. Direct: {e}, Fallback: {fallback_error}")
-        # Set dummy classes to prevent crashes
-        class DummyConfig:
-            @staticmethod
-            def validate_config():
-                return False
-        class DummyFetcher:
-            pass
-        class DummyFormatter:
-            pass
-        Config = DummyConfig
-        YouTubeTranscriptFetcher = DummyFetcher
-        LLMFormatter = DummyFormatter
+    logger.error(f"Import error: {e}")
+    raise
 
 app = FastAPI(title="Verbatim AI", description="YouTube Transcription and AI Formatting Tool")
 
-# Startup logging moved to module level to avoid Vercel issues
-logger.info("Starting Verbatim AI API...")
-logger.info(f"Config available: {Config is not None}")
-logger.info(f"YouTubeTranscriptFetcher available: {YouTubeTranscriptFetcher is not None}")
-logger.info(f"LLMFormatter available: {LLMFormatter is not None}")
-if Config:
-    logger.info(f"Config validation: {Config.validate_config()}")
-
-# Initialize services lazily to avoid crashes
-youtube_fetcher = None
-llm_formatter = None
-
-def get_youtube_fetcher():
-    global youtube_fetcher
-    if youtube_fetcher is None:
-        try:
-            if YouTubeTranscriptFetcher is None:
-                raise HTTPException(status_code=500, detail="YouTube service not available - module import failed")
-            youtube_fetcher = YouTubeTranscriptFetcher()
-            logger.info("YouTube fetcher initialized successfully")
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"Failed to initialize YouTube fetcher: {e}")
-            raise HTTPException(status_code=500, detail=f"YouTube service initialization failed: {str(e)}")
-    return youtube_fetcher
-
-def get_llm_formatter():
-    global llm_formatter
-    if llm_formatter is None:
-        try:
-            if LLMFormatter is None:
-                raise HTTPException(status_code=500, detail="LLM service not available - module import failed")
-            llm_formatter = LLMFormatter()
-            logger.info("LLM formatter initialized successfully")
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"Failed to initialize LLM formatter: {e}")
-            raise HTTPException(status_code=500, detail=f"LLM service initialization failed: {str(e)}")
-    return llm_formatter
+# Initialize services
+youtube_fetcher = YouTubeTranscriptFetcher()
+llm_formatter = LLMFormatter()
 
 # Pydantic models
 class TranscriptRequest(BaseModel):
@@ -139,7 +57,7 @@ class FormatResponse(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
-    """Serve a simple HTML page for Vercel"""
+    """Serve the web interface"""
     html_content = """
     <!DOCTYPE html>
     <html>
@@ -199,7 +117,7 @@ async def read_root():
                     const data = await response.json();
                     
                     if (data.success) {
-                        resultDiv.innerHTML = `<h4>Transcript:</h4><pre>${data.transcript}</pre>`;
+                        resultDiv.innerHTML = `<h4>Transcript:</h4><pre style="max-height: 300px; overflow-y: auto; white-space: pre-wrap;">${data.transcript}</pre>`;
                         document.getElementById('rawTranscript').value = data.transcript;
                     } else {
                         resultDiv.innerHTML = `<h4>Error:</h4><p>${data.error}</p>`;
@@ -231,7 +149,7 @@ async def read_root():
                     const data = await response.json();
                     
                     if (data.success) {
-                        resultDiv.innerHTML = `<h4>Formatted Transcript:</h4><pre>${data.formatted_transcript}</pre>`;
+                        resultDiv.innerHTML = `<h4>Formatted Transcript:</h4><pre style="max-height: 400px; overflow-y: auto; white-space: pre-wrap;">${data.formatted_transcript}</pre>`;
                     } else {
                         resultDiv.innerHTML = `<h4>Error:</h4><p>${data.error}</p>`;
                     }
@@ -251,11 +169,8 @@ async def get_transcript(request: TranscriptRequest):
     logger.info(f"Received transcript request for URL: {request.youtube_url}")
     
     try:
-        # Get YouTube fetcher instance
-        fetcher = get_youtube_fetcher()
-        
         # Extract video ID
-        video_id = fetcher.extract_video_id(request.youtube_url)
+        video_id = youtube_fetcher.extract_video_id(request.youtube_url)
         logger.info(f"Extracted video ID: {video_id}")
         
         if not video_id:
@@ -265,7 +180,7 @@ async def get_transcript(request: TranscriptRequest):
             )
         
         # Fetch transcript
-        transcript, error = fetcher.get_transcript(video_id)
+        transcript, error = youtube_fetcher.get_transcript(video_id)
         
         if error:
             logger.error(f"Transcript fetch failed: {error}")
@@ -299,11 +214,8 @@ async def format_transcript(request: FormatRequest):
                 error=f"Transcript too long. Maximum length is {Config.MAX_TRANSCRIPT_LENGTH} characters."
             )
         
-        # Get LLM formatter instance
-        formatter = get_llm_formatter()
-        
         # Format transcript
-        formatted_transcript, error = await formatter.format_transcript(
+        formatted_transcript, error = await llm_formatter.format_transcript(
             request.raw_transcript,
             model=request.model or Config.DEFAULT_MODEL
         )
@@ -326,24 +238,18 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "verbatim-ai",
-        "imports": {
-            "config": Config is not None,
-            "youtube_fetcher": YouTubeTranscriptFetcher is not None,
-            "llm_formatter": LLMFormatter is not None
-        },
-        "config_valid": Config.validate_config() if Config else False,
+        "config_valid": Config.validate_config(),
         "environment": "vercel"
     }
 
 @app.get("/api/test")
 async def test_endpoint():
-    """Simple test endpoint for debugging"""
+    """Simple test endpoint"""
     return {
         "message": "API is working!",
-        "timestamp": "2024-01-01",
         "environment": "vercel"
     }
 
 # Vercel handler
 from mangum import Mangum
-handler = Mangum(app)
+handler = Mangum(app, lifespan="off")
