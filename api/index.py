@@ -77,15 +77,13 @@ except ImportError as e:
 
 app = FastAPI(title="Verbatim AI", description="YouTube Transcription and AI Formatting Tool")
 
-@app.on_event("startup")
-async def startup_event():
-    """Log startup information and check imports"""
-    logger.info("Starting Verbatim AI API...")
-    logger.info(f"Config available: {Config is not None}")
-    logger.info(f"YouTubeTranscriptFetcher available: {YouTubeTranscriptFetcher is not None}")
-    logger.info(f"LLMFormatter available: {LLMFormatter is not None}")
-    if Config:
-        logger.info(f"Config validation: {Config.validate_config()}")
+# Startup logging moved to module level to avoid Vercel issues
+logger.info("Starting Verbatim AI API...")
+logger.info(f"Config available: {Config is not None}")
+logger.info(f"YouTubeTranscriptFetcher available: {YouTubeTranscriptFetcher is not None}")
+logger.info(f"LLMFormatter available: {LLMFormatter is not None}")
+if Config:
+    logger.info(f"Config validation: {Config.validate_config()}")
 
 # Initialize services lazily to avoid crashes
 youtube_fetcher = None
@@ -346,26 +344,6 @@ async def test_endpoint():
         "environment": "vercel"
     }
 
-# Create the Mangum handler at module level for Vercel
-try:
-    from mangum import Mangum
-    handler = Mangum(app, lifespan="off")
-    logger.info("Successfully created Mangum handler with explicit config")
-except ImportError as e:
-    logger.error(f"Mangum import failed: {e}")
-    # Create a dummy handler that returns an error
-    def handler(event, context):
-        return {
-            'statusCode': 500,
-            'headers': {'Content-Type': 'application/json'},
-            'body': '{"error": "Mangum adapter not available"}'
-        }
-except Exception as e:
-    logger.error(f"Handler creation failed: {e}")
-    # Create a dummy handler that returns an error
-    def handler(event, context):
-        return {
-            'statusCode': 500,
-            'headers': {'Content-Type': 'application/json'},
-            'body': '{"error": "Handler initialization failed"}'
-        }
+# Vercel handler
+from mangum import Mangum
+handler = Mangum(app)
