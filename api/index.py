@@ -18,10 +18,36 @@ logger = logging.getLogger(__name__)
 
 # Import from parent directory
 import sys
-sys.path.append('..')
-from config import Config
-from utils.youtube import YouTubeTranscriptFetcher
-from utils.llm import LLMFormatter
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+try:
+    from config import Config
+    from utils.youtube import YouTubeTranscriptFetcher
+    from utils.llm import LLMFormatter
+except ImportError as e:
+    # Fallback for Vercel deployment
+    import importlib.util
+    import pathlib
+    
+    parent_dir = pathlib.Path(__file__).parent.parent
+    
+    # Load config module
+    config_spec = importlib.util.spec_from_file_location("config", parent_dir / "config.py")
+    config_module = importlib.util.module_from_spec(config_spec)
+    config_spec.loader.exec_module(config_module)
+    Config = config_module.Config
+    
+    # Load utils modules
+    youtube_spec = importlib.util.spec_from_file_location("youtube", parent_dir / "utils" / "youtube.py")
+    youtube_module = importlib.util.module_from_spec(youtube_spec)
+    youtube_spec.loader.exec_module(youtube_module)
+    YouTubeTranscriptFetcher = youtube_module.YouTubeTranscriptFetcher
+    
+    llm_spec = importlib.util.spec_from_file_location("llm", parent_dir / "utils" / "llm.py")
+    llm_module = importlib.util.module_from_spec(llm_spec)
+    llm_spec.loader.exec_module(llm_module)
+    LLMFormatter = llm_module.LLMFormatter
 
 app = FastAPI(title="Verbatim AI", description="YouTube Transcription and AI Formatting Tool")
 
@@ -231,6 +257,15 @@ async def health_check():
         "status": "healthy",
         "service": "verbatim-ai",
         "config_valid": Config.validate_config()
+    }
+
+@app.get("/api/test")
+async def test_endpoint():
+    """Simple test endpoint for debugging"""
+    return {
+        "message": "API is working!",
+        "timestamp": "2024-01-01",
+        "environment": "vercel"
     }
 
 # This is required for Vercel deployment
