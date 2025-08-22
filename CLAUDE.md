@@ -4,122 +4,120 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Verbatim AI** is a web-based YouTube transcription and AI formatting tool that allows users to:
-1. Extract raw transcripts from YouTube videos using youtube-transcript-api
-2. Format transcripts into clean, readable documents using LLM APIs (OpenRouter)
-
-## Tech Stack
-
-- **Frontend**: HTML5, CSS3 (Tailwind CSS), JavaScript
-- **Backend**: Python with Flask or FastAPI
-- **APIs**: 
-  - youtube-transcript-api for transcript extraction
-  - OpenRouter API for LLM-based text formatting
-
-## Core Architecture
-
-The application follows a simple client-server architecture:
-
-1. **Frontend**: Single-page web interface with two main areas:
-   - Left panel: Raw transcript display with copy functionality
-   - Right panel: AI-formatted transcript display with copy functionality
-   - Input field for YouTube URL and action buttons
-
-2. **Backend**: Python web server that:
-   - Serves the frontend static files
-   - Handles YouTube URL processing and video ID extraction
-   - Interfaces with youtube-transcript-api for transcript fetching
-   - Manages OpenRouter API calls for transcript formatting
-
-3. **Data Flow**:
-   ```
-   YouTube URL → Video ID extraction → Transcript fetch → Raw display
-                                                      ↓
-   User clicks "Format with AI" → OpenRouter API → Formatted display
-   ```
-
-## Key Features Implementation
-
-### Transcript Fetching
-- Use youtube-transcript-api to extract raw transcripts
-- Handle multiple language availability
-- Display raw transcript with proper error handling
-
-### LLM Formatting
-- Send raw transcript to OpenRouter API with predefined prompt
-- Prompt structure includes:
-  - Summary generation (3-5 sentences)
-  - Key topics extraction (bulleted list)
-  - Full transcript formatting with proper punctuation and paragraphs
-  - Markdown formatting for output
-
-### Error Handling Requirements
-- Invalid YouTube URLs
-- Transcript unavailability
-- API connection errors
-- Rate limiting and timeout handling
+**Verbatim AI** is a web-based YouTube transcription and AI formatting tool built with FastAPI and designed for serverless deployment on Vercel. The application extracts YouTube video transcripts and formats them into clean, readable documents using AI.
 
 ## Development Commands
 
-### Setup and Installation
+### Quick Start
 ```bash
-# Install Python dependencies
+# Install dependencies and run with one command
+python start.py
+
+# Manual setup
 pip install -r requirements.txt
-
-# Set up environment variables (copy .env.example to .env and configure)
-cp .env.example .env
-```
-
-### Running the Application
-```bash
-# Start the development server
+cp .env.example .env  # Configure OPENROUTER_API_KEY
 python main.py
+```
 
-# Or using uvicorn directly with auto-reload
+### Local Development
+```bash
+# Start development server with auto-reload
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+# Test Vercel-compatible version locally
+cd api && python -c "from index import app; import uvicorn; uvicorn.run(app, host='0.0.0.0', port=8000)"
 ```
 
-### Project Structure
-```
-verbatim-ai/
-├── main.py (FastAPI application)
-├── config.py (Configuration settings)
-├── requirements.txt
-├── utils/
-│   ├── youtube.py (YouTube transcript fetching)
-│   └── llm.py (OpenRouter API integration)
-├── static/
-│   ├── index.html (Main UI)
-│   └── script.js (Frontend JavaScript)
-├── .env.example (Environment configuration template)
-└── README.md
+### Deployment
+```bash
+# Deploy to Vercel
+vercel --prod
+
+# Test endpoints after deployment
+curl https://your-app.vercel.app/health
+curl https://your-app.vercel.app/api/test
 ```
 
-## Future Development Notes
+## Architecture Overview
 
-- The application should be designed for easy extension with features like:
-  - Multiple language support
-  - Different summary formats
-  - Speaker diarization
-  - Export functionality (txt, md files)
-  - User account management
+### Dual-Application Structure
+The project maintains two FastAPI applications for different deployment scenarios:
 
-## API Integration
+1. **`main.py`**: Local development server with static file serving
+2. **`api/index.py`**: Vercel-optimized serverless handler with embedded HTML
 
-### YouTube Transcript API
-- Use python library `youtube-transcript-api`
-- Handle video ID extraction from various YouTube URL formats
-- Implement fallback for when transcripts are unavailable
+### Core Components
 
-### OpenRouter API
-- Use the predefined prompt from the PRD for consistent formatting
-- Implement proper API key management and error handling
-- Consider rate limiting and cost management
+- **`config.py`**: Centralized configuration with environment variable management
+- **`utils/youtube.py`**: YouTube video ID extraction and transcript fetching using youtube-transcript-api
+- **`utils/llm.py`**: OpenRouter API integration with chunking support for long transcripts
+- **`start.py`**: Development convenience script with dependency checking
 
-## UI/UX Requirements
+### Key Design Patterns
 
-- Clean, simple interface prioritizing usability
-- Loading indicators for both transcript fetching and AI formatting
-- Copy-to-clipboard functionality for both raw and formatted text
-- Responsive design considerations
-- Clear error messaging for various failure scenarios
+**Lazy Initialization**: Services are initialized on-demand in the Vercel handler to avoid startup issues in serverless environments.
+
+**Robust Import Handling**: The Vercel handler includes fallback import mechanisms using `importlib.util` to handle serverless deployment constraints.
+
+**Chunking Strategy**: Long transcripts are automatically split into manageable chunks (40,000 characters) for LLM processing, preserving JSON structure.
+
+## API Endpoints
+
+### Main Routes
+- `GET /` - Serves the web interface (embedded HTML in Vercel version)
+- `POST /api/transcript` - Fetches YouTube transcript from URL
+- `POST /api/format` - Formats transcript using AI (Claude 3.5 Sonnet via OpenRouter)
+
+### Utility Routes
+- `GET /health` - Health check with configuration validation
+- `GET /api/test` - Simple test endpoint for debugging deployments
+
+## Configuration
+
+### Required Environment Variables
+- `OPENROUTER_API_KEY`: Your OpenRouter API key (required)
+
+### Optional Configuration (in config.py)
+- `DEFAULT_MODEL`: AI model selection (default: "anthropic/claude-3.5-sonnet")
+- `MAX_TRANSCRIPT_LENGTH`: Maximum transcript length (default: 50,000 chars)
+- `REQUEST_TIMEOUT`: API request timeout (default: 30 seconds)
+
+## Key Implementation Details
+
+### YouTube Transcript Processing
+The application extracts video IDs from various YouTube URL formats and fetches transcripts as JSON data with timing information. The raw transcript is returned as pretty-printed JSON for display.
+
+### AI Formatting Strategy
+Transcripts are formatted using a specialized prompt that:
+- Extracts text content from JSON segments
+- Adds proper punctuation and capitalization
+- Creates logical paragraph breaks
+- Maintains the speaker's natural voice and style
+
+### Error Handling
+Comprehensive error handling covers:
+- Invalid YouTube URLs and video ID extraction failures
+- Missing or disabled transcripts
+- API configuration and connection issues
+- Chunking failures and partial processing errors
+
+## Deployment Architecture
+
+### Vercel Configuration
+- **Runtime**: Python 3.11.0
+- **Build**: Single Lambda function at `api/index.py`
+- **Routing**: All requests routed through the serverless handler
+- **Handler**: Module-level Mangum handler to avoid Vercel inspection issues
+
+### Local vs Production Differences
+- Local version serves static files from `/static/` directory
+- Vercel version embeds HTML directly in the handler
+- Both versions share the same core API functionality through shared utils
+
+## Development Workflow
+
+When making changes:
+1. Test locally using `python main.py` or `python start.py`
+2. Test Vercel compatibility using the local Vercel test command
+3. Verify environment variable configuration with `/health` endpoint
+4. Deploy to Vercel and test all API endpoints

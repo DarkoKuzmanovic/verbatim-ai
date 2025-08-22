@@ -4,6 +4,7 @@
       "Bash(pip show:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "acceptEdits"
   }
 }

@@ -346,33 +346,26 @@ async def test_endpoint():
         "environment": "vercel"
     }
 
-# This is required for Vercel deployment
-# Use a simple function-based handler to avoid class inspection issues
-def handler(event, context):
-    """Simple Vercel handler that avoids complex class inspection"""
-    try:
-        # Import Mangum inside the function to avoid module-level inspection
-        from mangum import Mangum
-        
-        # Create Mangum handler on-demand
-        mangum_handler = Mangum(app, lifespan="off")
-        
-        # Call the handler
-        return mangum_handler(event, context)
-        
-    except ImportError as e:
-        logger.error(f"Mangum import failed: {e}")
+# Create the Mangum handler at module level for Vercel
+try:
+    from mangum import Mangum
+    handler = Mangum(app, lifespan="off")
+    logger.info("Successfully created Mangum handler with explicit config")
+except ImportError as e:
+    logger.error(f"Mangum import failed: {e}")
+    # Create a dummy handler that returns an error
+    def handler(event, context):
         return {
             'statusCode': 500,
             'headers': {'Content-Type': 'application/json'},
             'body': '{"error": "Mangum adapter not available"}'
         }
-    except Exception as e:
-        logger.error(f"Handler execution failed: {e}")
+except Exception as e:
+    logger.error(f"Handler creation failed: {e}")
+    # Create a dummy handler that returns an error
+    def handler(event, context):
         return {
             'statusCode': 500,
             'headers': {'Content-Type': 'application/json'},
-            'body': '{"error": "Internal server error"}'
+            'body': '{"error": "Handler initialization failed"}'
         }
-
-logger.info("Created function-based Vercel handler")
