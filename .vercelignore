@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+.env.local
+.venv
+venv/
+.git
+.gitignore
+README.md
+CLAUDE.md
+prd.md
+.claude/
