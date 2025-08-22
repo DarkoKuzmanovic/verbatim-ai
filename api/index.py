@@ -238,20 +238,13 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "verbatim-ai",
-        "config_valid": Config.validate_config(),
-        "environment": "vercel"
+        "config_valid": Config.validate_config()
     }
 
 @app.get("/api/test")
 async def test_endpoint():
     """Simple test endpoint"""
     return {
-        "message": "API is working!",
-        "environment": "vercel"
+        "message": "API is working!"
     }
 
-# Vercel handler
-
-# For Vercel, export the FastAPI app directly
-# Mangum handler is only needed for AWS Lambda
-# Vercel expects an ASGI app, not a Lambda handler

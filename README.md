@@ -1,6 +1,6 @@
 # Verbatim AI
 
-A web-based tool that extracts YouTube video transcripts and formats them into clean, readable documents using AI. Deployable on Vercel with serverless architecture.
+A web-based tool that extracts YouTube video transcripts and formats them into clean, readable documents using AI. Easily deployable on any Linux VPS (Ubuntu/Apache).
 
 ## Features
 
@@ -8,7 +8,7 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
 - 🤖 AI-powered formatting with summaries and key topics
 - 🌐 Clean, responsive web interface
 - 📋 Copy-to-clipboard functionality
-- ⚡ Serverless deployment ready (Vercel)
+
 - 🛡️ Comprehensive error handling
 - 🔧 Health check and debugging endpoints
 
@@ -39,10 +39,10 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
 4. **Access the application**:
    Open your browser and go to [http://localhost:8000](http://localhost:8000)
 
-## Vercel Deployment
+
 
 ### Quick Deploy
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/verbatim-ai)
+
 
 ### Manual Deployment
 
@@ -56,8 +56,7 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
    git push -u origin main
    ```
 
-2. **Deploy to Vercel**:
-   - Connect your GitHub repository to Vercel
+
    - Set environment variable: `OPENROUTER_API_KEY`
    - Deploy automatically on push to main branch
 
@@ -113,7 +112,7 @@ The application handles various error scenarios:
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
 - **APIs**: YouTube Transcript API, OpenRouter API
 - **AI Model**: Claude 3.5 Sonnet (via OpenRouter)
-- **Deployment**: Vercel (Serverless)
+
 - **Dependencies**: 
   - `youtube-transcript-api>=0.6.2` - YouTube transcript fetching
   - `httpx` - HTTP client for API calls
@@ -123,16 +122,16 @@ The application handles various error scenarios:
 
 ```
 ├── api/
-│   └── index.py          # Vercel-optimized FastAPI app
+│   └── index.py          # FastAPI app entrypoint
 ├── utils/
 │   ├── youtube.py         # YouTube transcript fetching
 │   └── llm.py            # AI formatting logic
 ├── static/               # Static files (local dev)
 ├── config.py             # Configuration management
 ├── main.py              # Local development server
-├── vercel.json          # Vercel deployment config
+
 ├── requirements.txt     # Python dependencies
-└── runtime.txt          # Python version for Vercel
+
 ```
 
 ## Environment Variables

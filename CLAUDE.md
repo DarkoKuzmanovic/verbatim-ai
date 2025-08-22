@@ -101,17 +101,19 @@ Comprehensive error handling covers:
 - API configuration and connection issues
 - Chunking failures and partial processing errors
 
+
 ## Deployment Architecture
 
-### Vercel Configuration
-- **Runtime**: Python 3.11.0
-- **Build**: Single Lambda function at `api/index.py`
-- **Routing**: All requests routed through the serverless handler
-- **Handler**: Module-level Mangum handler to avoid Vercel inspection issues
+### Ubuntu/Apache Configuration
+- **Runtime**: Python 3.11+
+- **App Server**: Gunicorn with Uvicorn workers
+- **Reverse Proxy**: Apache with mod_proxy and mod_proxy_http
+- **Static Files**: Served via Apache Alias from `/static/` directory
+- **Entrypoint**: `main.py` for local, `api/index.py` for production
 
 ### Local vs Production Differences
 - Local version serves static files from `/static/` directory
-- Vercel version embeds HTML directly in the handler
+- Production version uses Apache for reverse proxy and static file serving
 - Both versions share the same core API functionality through shared utils
 
 ## Development Workflow
