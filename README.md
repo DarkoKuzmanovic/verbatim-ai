@@ -1,16 +1,18 @@
 # Verbatim AI
 
-A web-based tool that extracts YouTube video transcripts and formats them into clean, readable documents using AI.
+A web-based tool that extracts YouTube video transcripts and formats them into clean, readable documents using AI. Deployable on Vercel with serverless architecture.
 
 ## Features
 
-- Extract raw transcripts from YouTube videos
-- AI-powered formatting with summaries and key topics
-- Clean, responsive web interface
-- Copy-to-clipboard functionality
-- Comprehensive error handling
+- 🎥 Extract raw transcripts from YouTube videos
+- 🤖 AI-powered formatting with summaries and key topics
+- 🌐 Clean, responsive web interface
+- 📋 Copy-to-clipboard functionality
+- ⚡ Serverless deployment ready (Vercel)
+- 🛡️ Comprehensive error handling
+- 🔧 Health check and debugging endpoints
 
-## Setup
+## Local Development Setup
 
 1. **Install dependencies**:
    ```bash
@@ -37,6 +39,34 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
 4. **Access the application**:
    Open your browser and go to [http://localhost:8000](http://localhost:8000)
 
+## Vercel Deployment
+
+### Quick Deploy
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/verbatim-ai)
+
+### Manual Deployment
+
+1. **Prepare for deployment**:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git branch -M main
+   git remote add origin <your-github-repo-url>
+   git push -u origin main
+   ```
+
+2. **Deploy to Vercel**:
+   - Connect your GitHub repository to Vercel
+   - Set environment variable: `OPENROUTER_API_KEY`
+   - Deploy automatically on push to main branch
+
+3. **Verify deployment**:
+   - Test `/api/test` endpoint for basic functionality
+   - Check `/health` endpoint for configuration status
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+
 ## Usage
 
 1. Paste a YouTube video URL into the input field
@@ -46,10 +76,27 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
 
 ## API Endpoints
 
+### Main Interface
 - `GET /` - Main web interface
+
+### API Routes
 - `POST /api/transcript` - Fetch YouTube transcript
+  ```json
+  {
+    "youtube_url": "https://www.youtube.com/watch?v=VIDEO_ID"
+  }
+  ```
 - `POST /api/format` - Format transcript with AI
-- `GET /health` - Health check
+  ```json
+  {
+    "raw_transcript": "transcript text...",
+    "model": "anthropic/claude-3.5-sonnet" // optional
+  }
+  ```
+
+### Utility Endpoints
+- `GET /health` - Health check and configuration status
+- `GET /api/test` - Simple test endpoint for debugging
 
 ## Error Handling
 
@@ -62,7 +109,37 @@ The application handles various error scenarios:
 
 ## Tech Stack
 
-- **Backend**: FastAPI, Python
-- **Frontend**: HTML5, Tailwind CSS, Vanilla JavaScript
+- **Backend**: FastAPI, Python 3.11
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
 - **APIs**: YouTube Transcript API, OpenRouter API
 - **AI Model**: Claude 3.5 Sonnet (via OpenRouter)
+- **Deployment**: Vercel (Serverless)
+- **Dependencies**: 
+  - `youtube-transcript-api>=0.6.2` - YouTube transcript fetching
+  - `httpx` - HTTP client for API calls
+  - `python-dotenv` - Environment variable management
+
+## Project Structure
+
+```
+├── api/
+│   └── index.py          # Vercel-optimized FastAPI app
+├── utils/
+│   ├── youtube.py         # YouTube transcript fetching
+│   └── llm.py            # AI formatting logic
+├── static/               # Static files (local dev)
+├── config.py             # Configuration management
+├── main.py              # Local development server
+├── vercel.json          # Vercel deployment config
+├── requirements.txt     # Python dependencies
+└── runtime.txt          # Python version for Vercel
+```
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `OPENROUTER_API_KEY` | Your OpenRouter API key | Yes |
+| `OPENROUTER_BASE_URL` | OpenRouter API base URL | No (has default) |
+| `DEFAULT_MODEL` | Default AI model to use | No (has default) |
+| `MAX_TRANSCRIPT_LENGTH` | Maximum transcript length | No (has default) |
