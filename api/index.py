@@ -347,31 +347,32 @@ async def test_endpoint():
     }
 
 # This is required for Vercel deployment
-# Import Mangum at module level to avoid inspection issues
-try:
-    from mangum import Mangum
-    # Create the handler with explicit configuration
-    handler = Mangum(
-        app,
-        lifespan="off",
-        api_gateway_base_path=None,
-        text_mime_types=[
-            "application/json",
-            "application/javascript",
-            "application/xml",
-            "application/vnd.api+json",
-            "text/css",
-            "text/html",
-            "text/plain",
-        ],
-    )
-    logger.info("Successfully created Mangum handler with explicit config")
-except Exception as e:
-    logger.error(f"Failed to create Mangum handler: {e}")
-    # Simple fallback that should work with Vercel
-    def handler(event, context):
-        logger.error("Using fallback handler due to Mangum failure")
+# Use a simple function-based handler to avoid class inspection issues
+def handler(event, context):
+    """Simple Vercel handler that avoids complex class inspection"""
+    try:
+        # Import Mangum inside the function to avoid module-level inspection
+        from mangum import Mangum
+        
+        # Create Mangum handler on-demand
+        mangum_handler = Mangum(app, lifespan="off")
+        
+        # Call the handler
+        return mangum_handler(event, context)
+        
+    except ImportError as e:
+        logger.error(f"Mangum import failed: {e}")
         return {
             'statusCode': 500,
-            'body': 'Handler initialization failed'
+            'headers': {'Content-Type': 'application/json'},
+            'body': '{"error": "Mangum adapter not available"}'
         }
+    except Exception as e:
+        logger.error(f"Handler execution failed: {e}")
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json'},
+            'body': '{"error": "Internal server error"}'
+        }
+
+logger.info("Created function-based Vercel handler")

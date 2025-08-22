@@ -61,6 +61,50 @@ handler = Mangum(app, lifespan="off")
 2. **API Endpoints**: Test `/api/transcript` and `/api/format` endpoints
 3. **Error Monitoring**: Check Vercel logs for any remaining issues
 
+## Latest Updates (Troubleshooting Persistent Issue)
+
+### Additional Attempts Made:
+
+1. **Enhanced Error Handling**: Added try-catch blocks around Mangum import and initialization
+2. **Explicit Mangum Configuration**: Added detailed MIME type configuration and API gateway settings
+3. **Fallback Dependencies**: Added `asgiref==3.7.2` for additional ASGI/WSGI compatibility
+4. **Module-Level Import**: Moved Mangum import to module level to avoid runtime inspection issues
+
+### Current Handler Configuration:
+```python
+try:
+    from mangum import Mangum
+    handler = Mangum(
+        app,
+        lifespan="off",
+        api_gateway_base_path=None,
+        text_mime_types=[
+            "application/json",
+            "application/javascript",
+            "application/xml",
+            "application/vnd.api+json",
+            "text/css",
+            "text/html",
+            "text/plain",
+        ],
+    )
+except Exception as e:
+    def handler(event, context):
+        return {
+            'statusCode': 500,
+            'body': 'Handler initialization failed'
+        }
+```
+
+### If Issue Persists:
+
+The `issubclass() arg 1 must be a class` error in `vc__handler__python.py` line 218 suggests a deeper compatibility issue with Vercel's Python runtime. Consider:
+
+1. **Alternative Deployment**: Try deploying as a static site with API routes
+2. **Vercel Configuration**: Check if `vercel.json` needs specific Python runtime settings
+3. **Framework Alternative**: Consider using a simpler framework like Flask for Vercel compatibility
+4. **Runtime Version**: Ensure Python runtime version compatibility in `runtime.txt`
+
 ## Expected Outcome
 
 With this fix:
