@@ -1,155 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Verbatim AI - YouTube Transcriber</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Beer CSS (global) -->
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.11.33/dist/cdn/beer.min.css" rel="stylesheet" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.11.33/dist/cdn/beer.min.js"></script>
+    <link href="/static/beer-layout.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Optional: dynamic Material colors for theme switching -->
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"
+    ></script>
+  </head>
+  <body class="dark">
+    <main class="responsive">
+      <div class="container">
         <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">
-                <i class="fas fa-video text-red-500 mr-2"></i>
-                Verbatim AI
-            </h1>
-            <p class="text-gray-600">Transform YouTube videos into clean, formatted transcripts using AI</p>
-        </div>
+        <header class="card text-center">
+          <h1 class="title">
+            <i class="fas fa-video" style="color: var(--primary); margin-right: 10px"></i>
+            Verbatim AI
+          </h1>
+          <p class="subtitle">Transform YouTube videos into clean, formatted transcripts using AI</p>
+        </header>
 
         <!-- URL Input Section -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div class="flex flex-col space-y-4">
-                <div>
-                    <label for="youtube-url" class="block text-sm font-medium text-gray-700 mb-2">
-                        YouTube Video URL
-                    </label>
-                    <input
-                        type="url"
-                        id="youtube-url"
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                </div>
-                <button
-                    id="get-transcript-btn"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <i class="fas fa-download mr-2"></i>
-                    Get Transcript
-                </button>
-            </div>
-        </div>
+        <section class="card">
+          <label for="youtube-url">YouTube Video URL</label>
+          <div class="input-section">
+            <input type="url" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..." />
+            <button id="get-transcript-btn" class="button primary">
+              <i class="fas fa-download"></i>
+              Get Transcript
+            </button>
+          </div>
+        </section>
 
         <!-- Transcript Display Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Raw Transcript -->
-            <div class="bg-white rounded-lg shadow-md">
-                <div class="p-4 border-b border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-semibold text-gray-800">
-                            <i class="fas fa-file-alt text-gray-500 mr-2"></i>
-                            Raw Transcript
-                        </h2>
-                        <button
-                            id="copy-raw-btn"
-                            class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm transition duration-200 disabled:opacity-50"
-                            disabled
-                        >
-                            <i class="fas fa-copy mr-1"></i>
-                            Copy
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div id="raw-transcript-loading" class="hidden text-center py-8">
-                        <i class="fas fa-spinner fa-spin text-2xl text-blue-500 mb-2"></i>
-                        <p class="text-gray-600">Fetching transcript...</p>
-                    </div>
-                    <textarea
-                        id="raw-transcript"
-                        readonly
-                        placeholder="Raw transcript will appear here..."
-                        class="w-full h-96 p-4 border border-gray-300 rounded-lg resize-none bg-gray-50 text-sm"
-                    ></textarea>
-                </div>
+        <div class="grid">
+          <!-- Raw Transcript -->
+          <section class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-file-alt" style="margin-right: 8px"></i>Raw Transcript</h2>
+              <button id="copy-raw-btn" class="button" disabled><i class="fas fa-copy"></i> Copy</button>
             </div>
+            <div>
+              <div id="raw-transcript-loading" class="hidden loading-state">
+                <i class="fas fa-spinner fa-spin" style="color: var(--primary)"></i>
+                <p>Fetching transcript...</p>
+              </div>
+              <textarea
+                id="raw-transcript"
+                readonly
+                placeholder="Raw transcript will appear here..."
+                class="transcript-area"
+              ></textarea>
+            </div>
+          </section>
 
-            <!-- Formatted Transcript -->
-            <div class="bg-white rounded-lg shadow-md">
-                <div class="p-4 border-b border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-semibold text-gray-800">
-                            <i class="fas fa-magic text-purple-500 mr-2"></i>
-                            AI Formatted
-                        </h2>
-                        <div class="flex items-center space-x-2">
-                            <div class="flex items-center space-x-2">
-                                <label for="model-select" class="text-sm font-medium text-gray-700">Model:</label>
-                                <select
-                                    id="model-select"
-                                    class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                                >
-                                    <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                                    <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
-                                    <option value="openai/gpt-4o">GPT-4o</option>
-                                    <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
-                                    <option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
-                                    <option value="meta-llama/llama-3.1-8b-instruct">Llama 3.1 8B</option>
-                                    <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
-                                </select>
-                            </div>
-                            <button
-                                id="format-btn"
-                                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled
-                            >
-                                <i class="fas fa-wand-magic-sparkles mr-1"></i>
-                                Format with AI
-                            </button>
-                            <button
-                                id="copy-formatted-btn"
-                                class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm transition duration-200 disabled:opacity-50"
-                                disabled
-                            >
-                                <i class="fas fa-copy mr-1"></i>
-                                Copy
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div id="formatted-transcript-loading" class="hidden text-center py-8">
-                        <i class="fas fa-spinner fa-spin text-2xl text-purple-500 mb-2"></i>
-                        <p class="text-gray-600">Formatting with AI...</p>
-                    </div>
-                    <div
-                        id="formatted-transcript"
-                        class="w-full h-96 p-4 border border-gray-300 rounded-lg overflow-y-auto bg-gray-50 text-sm prose prose-sm max-w-none"
-                    >
-                        <p class="text-gray-500 italic">Formatted transcript will appear here...</p>
-                    </div>
-                </div>
+          <!-- Formatted Transcript -->
+          <section class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-magic" style="color: var(--secondary); margin-right: 8px"></i>AI Formatted</h2>
+              <div class="card-controls">
+                <label for="model-select">Model:</label>
+                <select id="model-select">
+                  <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                  <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+                  <option value="openai/gpt-4o">GPT-4o</option>
+                  <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+                  <option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
+                  <option value="meta-llama/llama-3.1-8b-instruct">Llama 3.1 8B</option>
+                  <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
+                </select>
+                <button id="format-btn" class="button primary" disabled>
+                  <i class="fas fa-wand-magic-sparkles"></i> Format with AI
+                </button>
+                <button id="copy-formatted-btn" class="button" disabled><i class="fas fa-copy"></i> Copy</button>
+              </div>
             </div>
+            <div>
+              <div id="formatted-transcript-loading" class="hidden loading-state">
+                <i class="fas fa-spinner fa-spin" style="color: var(--secondary)"></i>
+                <p>Formatting with AI...</p>
+              </div>
+              <div id="formatted-transcript" class="transcript-area">
+                <p style="opacity: 0.6">Formatted transcript will appear here...</p>
+              </div>
+            </div>
+          </section>
         </div>
 
         <!-- Error Display -->
-        <div id="error-display" class="hidden mt-4 bg-red-50 border border-red-300 rounded-lg p-4">
-            <div class="flex items-center">
-                <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-                <span class="text-red-700 font-medium">Error:</span>
-            </div>
-            <p id="error-message" class="text-red-600 mt-1"></p>
+        <div id="error-display" class="hidden error-display">
+          <div>
+            <i class="fas fa-exclamation-circle" style="color: var(--error); margin-right: 8px"></i>
+            <strong>Error:</strong>
+          </div>
+          <p id="error-message"></p>
         </div>
 
         <!-- Toast Notification -->
-        <div id="toast" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
-            <i class="fas fa-check mr-2"></i>
-            <span id="toast-message">Copied to clipboard!</span>
+        <div id="toast" class="hidden toast">
+          <i class="fas fa-check" style="margin-right: 8px"></i>
+          <span id="toast-message">Copied to clipboard!</span>
         </div>
-    </div>
+      </div>
+    </main>
 
     <script src="/static/script.js"></script>
-</body>
+  </body>
 </html>
