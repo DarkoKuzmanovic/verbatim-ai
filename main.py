@@ -42,6 +42,7 @@ class TranscriptResponse(BaseModel):
 class FormatRequest(BaseModel):
     raw_transcript: str
     model: Optional[str] = None
+    api_key: Optional[str] = None
 
 class FormatResponse(BaseModel):
     success: bool
@@ -96,20 +97,28 @@ async def get_transcript(request: TranscriptRequest):
 async def format_transcript(request: FormatRequest):
     """Format transcript using LLM"""
     try:
-        # Check if API key is configured
-        if not Config.validate_config():
+        # Check if API key is configured (either in env or provided in request)
+        if not Config.validate_config() and not request.api_key:
             return FormatResponse(
                 success=False,
-                error="OpenRouter API key not configured. Please set OPENROUTER_API_KEY environment variable."
+                error="No API key available. Please configure OPENROUTER_API_KEY or provide API key in settings."
             )
         
-        # Set model if provided
-        if request.model:
-            llm_formatter.model = request.model
-            logger.info(f"Using custom model: {request.model}")
-        
-        # Format transcript
-        formatted_text, error = await llm_formatter.format_transcript(request.raw_transcript)
+        # Create a new formatter instance if API key is provided
+        if request.api_key:
+            from utils.llm import LLMFormatter
+            custom_formatter = LLMFormatter()
+            custom_formatter.api_key = request.api_key
+            if request.model:
+                custom_formatter.model = request.model
+                logger.info(f"Using custom model with custom API key: {request.model}")
+            formatted_text, error = await custom_formatter.format_transcript(request.raw_transcript)
+        else:
+            # Use the default formatter
+            if request.model:
+                llm_formatter.model = request.model
+                logger.info(f"Using custom model: {request.model}")
+            formatted_text, error = await llm_formatter.format_transcript(request.raw_transcript)
         
         if error:
             return FormatResponse(success=False, error=error)

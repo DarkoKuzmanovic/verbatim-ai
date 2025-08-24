@@ -49,6 +49,7 @@ class TranscriptResponse(BaseModel):
 class FormatRequest(BaseModel):
     raw_transcript: str
     model: Optional[str] = None
+    api_key: Optional[str] = None
 
 class FormatResponse(BaseModel):
     success: bool
@@ -200,11 +201,11 @@ async def format_transcript(request: FormatRequest):
     logger.info("Received format request")
     
     try:
-        # Validate configuration
-        if not Config.validate_config():
+        # Validate configuration (either env or provided API key)
+        if not Config.validate_config() and not request.api_key:
             return FormatResponse(
                 success=False,
-                error="API configuration is missing. Please check your environment variables."
+                error="No API key available. Please configure OPENROUTER_API_KEY or provide API key in settings."
             )
         
         # Check transcript length
@@ -214,11 +215,20 @@ async def format_transcript(request: FormatRequest):
                 error=f"Transcript too long. Maximum length is {Config.MAX_TRANSCRIPT_LENGTH} characters."
             )
         
-        # Format transcript
-        formatted_transcript, error = await llm_formatter.format_transcript(
-            request.raw_transcript,
-            model=request.model or Config.DEFAULT_MODEL
-        )
+        # Create a new formatter instance if API key is provided
+        if request.api_key:
+            from utils.llm import LLMFormatter
+            custom_formatter = LLMFormatter()
+            custom_formatter.api_key = request.api_key
+            if request.model:
+                custom_formatter.model = request.model
+            formatted_transcript, error = await custom_formatter.format_transcript(request.raw_transcript)
+        else:
+            # Use the default formatter
+            formatted_transcript, error = await llm_formatter.format_transcript(
+                request.raw_transcript,
+                model=request.model or Config.DEFAULT_MODEL
+            )
         
         if error:
             logger.error(f"Formatting failed: {error}")

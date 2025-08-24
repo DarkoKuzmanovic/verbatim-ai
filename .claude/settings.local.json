@@ -1,10 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pip show:*)"
+      "Bash(pip show:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": [],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "D:\\d D:\\source\\repos"
+    ]
   }
 }

@@ -26,19 +26,20 @@ python main.py
 # Start development server with auto-reload
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-# Test Vercel-compatible version locally
-cd api && python -c "from index import app; import uvicorn; uvicorn.run(app, host='0.0.0.0', port=8000)"
+# Test serverless-compatible version locally
+python -c "import sys; sys.path.insert(0, '.'); from api.index import app; import uvicorn; uvicorn.run(app, host='0.0.0.0', port=8000)"
 ```
 
-### Deployment
+### Testing and Debugging
 
 ```bash
-# Deploy to Vercel
-vercel --prod
+# Test API endpoints locally
+curl http://localhost:8000/health
+curl http://localhost:8000/api/test
+curl -X POST http://localhost:8000/api/transcript -H "Content-Type: application/json" -d '{"youtube_url":"https://youtube.com/watch?v=VIDEO_ID"}'
 
-# Test endpoints after deployment
-curl https://your-app.vercel.app/health
-curl https://your-app.vercel.app/api/test
+# Check configuration validation
+python -c "from config import Config; print(f'Config valid: {Config.validate_config()}')"
 ```
 
 ## Architecture Overview
@@ -63,7 +64,7 @@ The project maintains two FastAPI applications for different deployment scenario
 
 **Robust Import Handling**: The Vercel handler includes fallback import mechanisms using `importlib.util` to handle serverless deployment constraints.
 
-**Chunking Strategy**: Long transcripts are automatically split into manageable chunks (40,000 characters) for LLM processing, preserving JSON structure.
+**Chunking Strategy**: Long transcripts exceeding MAX_TRANSCRIPT_LENGTH (50,000 chars) are automatically split into manageable chunks (40,000 characters) for LLM processing. The chunker intelligently preserves JSON structure by splitting at segment boundaries rather than arbitrary character positions, ensuring each chunk remains valid JSON.
 
 ## API Endpoints
 
@@ -116,25 +117,29 @@ Comprehensive error handling covers:
 
 ## Deployment Architecture
 
-### Ubuntu/Apache Configuration
+The project supports multiple deployment scenarios with different entry points:
 
+### Local Development
+- **Entry Point**: `main.py` - serves static files from `/static/` directory
+- **Command**: `python main.py` or `uvicorn main:app --reload`
+
+### Serverless Deployment (Vercel)
+- **Entry Point**: `api/index.py` - embedded HTML, no static file serving needed
+- **Features**: Lazy initialization, robust import handling for serverless constraints
+
+### Traditional Server Deployment (Ubuntu/Apache)
 - **Runtime**: Python 3.11+
 - **App Server**: Gunicorn with Uvicorn workers
 - **Reverse Proxy**: Apache with mod_proxy and mod_proxy_http
 - **Static Files**: Served via Apache Alias from `/static/` directory
-- **Entrypoint**: `main.py` for local, `api/index.py` for production
-
-### Local vs Production Differences
-
-- Local version serves static files from `/static/` directory
-- Production version uses Apache for reverse proxy and static file serving
-- Both versions share the same core API functionality through shared utils
+- **Entry Point**: `main.py` for local development, `api/index.py` for production
 
 ## Development Workflow
 
 When making changes:
 
-1. Test locally using `python main.py` or `python start.py`
-2. Test Vercel compatibility using the local Vercel test command
+1. Test locally using `python start.py` (automatic dependency checking) or `python main.py`
+2. Test serverless compatibility using: `python -c "import sys; sys.path.insert(0, '.'); from api.index import app; import uvicorn; uvicorn.run(app)"`
 3. Verify environment variable configuration with `/health` endpoint
-4. Deploy to Vercel and test all API endpoints
+4. Test all API endpoints using the debugging curl commands above
+5. Deploy and verify functionality in target environment

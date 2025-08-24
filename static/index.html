@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Verbatim AI - YouTube Transcriber</title>
+    <link rel="icon" type="image/svg+xml" href="/static/icons/speak-ai-fill.svg" />
     <!-- Beer CSS (global) -->
     <link href="https://cdn.jsdelivr.net/npm/beercss@3.11.33/dist/cdn/beer.min.css" rel="stylesheet" />
     <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.11.33/dist/cdn/beer.min.js"></script>
@@ -20,10 +21,21 @@
       <div class="container">
         <!-- Header -->
         <header class="card text-center">
-          <h1 class="title">
-            <i class="fas fa-video" style="color: var(--primary); margin-right: 10px"></i>
-            Verbatim AI
-          </h1>
+          <div class="header-top">
+            <h1 class="title">
+              <img
+                src="/static/icons/speak-ai-fill.svg"
+                width="32"
+                height="32"
+                class="icon-primary"
+                alt="Verbatim AI"
+              />
+              Verbatim AI
+            </h1>
+            <button id="settings-btn" class="button settings-button" title="Settings">
+              <img src="/static/icons/settings.svg" width="20" height="20" class="icon-primary" alt="Settings" />
+            </button>
+          </div>
           <p class="subtitle">Transform YouTube videos into clean, formatted transcripts using AI</p>
         </header>
 
@@ -31,9 +43,19 @@
         <section class="card">
           <label for="youtube-url">YouTube Video URL</label>
           <div class="input-section">
-            <input type="url" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..." />
+            <input
+              type="url"
+              id="youtube-url"
+              placeholder="https://www.youtube.com/watch?v=..."
+              title="Press Enter to fetch transcript"
+              autocomplete="off"
+              data-form-type="other"
+              data-lpignore="true"
+              readonly
+              onfocus="this.removeAttribute('readonly')"
+            />
             <button id="get-transcript-btn" class="button primary">
-              <i class="fas fa-download"></i>
+              <img src="/static/icons/get-transcript.svg" width="16" height="16" class="icon-primary" alt="" />
               Get Transcript
             </button>
           </div>
@@ -44,13 +66,26 @@
           <!-- Raw Transcript -->
           <section class="card">
             <div class="card-header">
-              <h2><i class="fas fa-file-alt" style="margin-right: 8px"></i>Raw Transcript</h2>
-              <button id="copy-raw-btn" class="button" disabled><i class="fas fa-copy"></i> Copy</button>
+              <h2>
+                <img src="/static/icons/raw-h2.svg" width="20" height="20" class="icon-white" alt="" />
+                Raw Transcript
+              </h2>
+              <button id="copy-raw-btn" class="button" disabled title="Copy raw transcript">
+                <img src="/static/icons/copy.svg" width="16" height="16" class="icon-primary" alt="" />
+              </button>
             </div>
             <div>
-              <div id="raw-transcript-loading" class="hidden loading-state">
-                <i class="fas fa-spinner fa-spin" style="color: var(--primary)"></i>
-                <p>Fetching transcript...</p>
+              <div id="raw-transcript-loading" class="hidden skeleton-loader">
+                <div class="skeleton-line long"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line long"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line long"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line long"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line long"></div>
               </div>
               <textarea
                 id="raw-transcript"
@@ -62,33 +97,40 @@
           </section>
 
           <!-- Formatted Transcript -->
-          <section class="card">
+          <section id="formatted-section" class="card">
             <div class="card-header">
-              <h2><i class="fas fa-magic" style="color: var(--secondary); margin-right: 8px"></i>AI Formatted</h2>
+              <h2>
+                <img src="/static/icons/format-h2.svg" width="20" height="20" class="icon-white" alt="" />
+                AI Format
+              </h2>
               <div class="card-controls">
                 <label for="model-select">Model:</label>
                 <select id="model-select">
-                  <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                  <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
-                  <option value="openai/gpt-4o">GPT-4o</option>
-                  <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
-                  <option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
-                  <option value="meta-llama/llama-3.1-8b-instruct">Llama 3.1 8B</option>
-                  <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
+                  <option value="">Loading models...</option>
                 </select>
-                <button id="format-btn" class="button primary" disabled>
-                  <i class="fas fa-wand-magic-sparkles"></i> Format with AI
+                <button id="format-btn" class="button primary" disabled title="Format with AI (Ctrl+Enter)">
+                  <img src="/static/icons/ai.svg" width="16" height="16" class="icon-primary" alt="" />
                 </button>
-                <button id="copy-formatted-btn" class="button" disabled><i class="fas fa-copy"></i> Copy</button>
+                <button id="copy-formatted-btn" class="button" disabled title="Copy formatted transcript">
+                  <img src="/static/icons/copy.svg" width="16" height="16" class="icon-primary" alt="" />
+                </button>
               </div>
             </div>
             <div>
-              <div id="formatted-transcript-loading" class="hidden loading-state">
-                <i class="fas fa-spinner fa-spin" style="color: var(--secondary)"></i>
-                <p>Formatting with AI...</p>
+              <div id="formatted-transcript-loading" class="hidden skeleton-loader">
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line long"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line long"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line long"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line long"></div>
+                <div class="skeleton-line short"></div>
               </div>
               <div id="formatted-transcript" class="transcript-area">
-                <p style="opacity: 0.6">Formatted transcript will appear here...</p>
+                <p style="opacity: 0.6">Get a transcript first, then click "Format with AI" to process it...</p>
               </div>
             </div>
           </section>
@@ -96,20 +138,170 @@
 
         <!-- Error Display -->
         <div id="error-display" class="hidden error-display">
-          <div>
-            <i class="fas fa-exclamation-circle" style="color: var(--error); margin-right: 8px"></i>
-            <strong>Error:</strong>
+          <div class="error-header">
+            <div>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style="color: var(--error)"
+              >
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" />
+                <path d="M12 16h.01" stroke="currentColor" stroke-width="2" />
+              </svg>
+              <strong>Error:</strong>
+            </div>
+            <button id="error-dismiss" class="error-dismiss" title="Dismiss">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" />
+                <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" />
+              </svg>
+            </button>
           </div>
           <p id="error-message"></p>
         </div>
 
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+          <div class="modal-backdrop"></div>
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Settings</h2>
+              <button id="close-settings" class="modal-close" title="Close">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" />
+                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="modal-body">
+              <!-- API Key Section -->
+              <section class="settings-section">
+                <h3>OpenRouter API Key</h3>
+                <p class="settings-description">Override the default API key for this browser</p>
+                <div class="input-group">
+                  <input type="password" id="api-key-input" placeholder="Enter your OpenRouter API key..." />
+                  <button id="toggle-api-key" class="button" title="Show/Hide API key">👁️</button>
+                </div>
+                <div class="settings-actions">
+                  <button id="save-api-key" class="button primary">Save API Key</button>
+                  <button id="clear-api-key" class="button">Clear</button>
+                </div>
+              </section>
+
+              <!-- Models Section -->
+              <section class="settings-section">
+                <h3>Custom Models</h3>
+                <p class="settings-description">Add or remove OpenRouter models</p>
+
+                <div class="input-group">
+                  <input type="text" id="model-id-input" placeholder="model-provider/model-name:variant" />
+                  <input type="text" id="model-name-input" placeholder="Display Name" />
+                  <button id="add-model" class="button primary">Add Model</button>
+                </div>
+
+                <div class="models-list">
+                  <h4>Custom Models:</h4>
+                  <div id="custom-models-container">
+                    <!-- Custom models will be populated here -->
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="modal-footer">
+              <div style="display: flex; gap: 8px; align-items: center">
+                <button id="export-settings" class="button" onclick="verbatimAI.exportSettings()">
+                  Export Settings
+                </button>
+                <label for="import-settings-file" class="button" style="margin: 0; cursor: pointer"
+                  >Import Settings</label
+                >
+                <input
+                  type="file"
+                  id="import-settings-file"
+                  accept=".json"
+                  style="display: none"
+                  onchange="verbatimAI.importSettings(event)"
+                />
+                <button id="reset-settings" class="button">Reset All Settings</button>
+              </div>
+              <button id="close-settings-footer" class="button primary">Close</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Toast Notification -->
         <div id="toast" class="hidden toast">
-          <i class="fas fa-check" style="margin-right: 8px"></i>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M9 12l2 2 4-4"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+          </svg>
           <span id="toast-message">Copied to clipboard!</span>
         </div>
       </div>
     </main>
+
+    <footer
+      style="
+        text-align: center;
+        padding: 40px 20px;
+        opacity: 0.6;
+        font-size: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <p style="margin: 0 0 12px 0">Copyright &copy; 2025 - Darko Kuzmanović</p>
+      
+      <!-- Social Media Icons -->
+      <div style="display: flex; gap: 16px; margin-bottom: 12px; align-items: center;">
+        <a href="https://github.com/DarkoKuzmanovic" target="_blank" rel="noopener" title="GitHub" style="display: inline-flex; align-items: center; opacity: 0.7; transition: opacity 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: white;">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+        </a>
+        
+        <a href="https://x.com/quzma" target="_blank" rel="noopener" title="Twitter/X" style="display: inline-flex; align-items: center; opacity: 0.7; transition: opacity 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: white;">
+            <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
+          </svg>
+        </a>
+        
+        <a href="https://quz.ma" target="_blank" rel="noopener" title="Website" style="display: inline-flex; align-items: center; opacity: 0.7; transition: opacity 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: white;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+        </a>
+      </div>
+      
+      <p style="margin: 0">
+        Icons by
+        <a
+          href="https://freesvgicons.com/packs/ri"
+          target="_blank"
+          rel="noopener"
+          style="color: var(--primary); text-decoration: none"
+          >FreesvgIcons.com</a
+        >
+      </p>
+    </footer>
 
     <script src="/static/script.js"></script>
   </body>
