@@ -120,14 +120,17 @@ Comprehensive error handling covers:
 The project supports multiple deployment scenarios with different entry points:
 
 ### Local Development
+
 - **Entry Point**: `main.py` - serves static files from `/static/` directory
 - **Command**: `python main.py` or `uvicorn main:app --reload`
 
 ### Serverless Deployment (Vercel)
+
 - **Entry Point**: `api/index.py` - embedded HTML, no static file serving needed
 - **Features**: Lazy initialization, robust import handling for serverless constraints
 
 ### Traditional Server Deployment (Ubuntu/Apache)
+
 - **Runtime**: Python 3.11+
 - **App Server**: Gunicorn with Uvicorn workers
 - **Reverse Proxy**: Apache with mod_proxy and mod_proxy_http
