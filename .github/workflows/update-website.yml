@@ -16,7 +16,7 @@ jobs:
       - name: Extract website URL from README
         id: extract
         run: |
-          # Look for website URL in README (<!-- website: https://your-site.com -->)
+          # Look for website URL in README (<!-- website: https://verbatim.aflux.nl -->)
           website_url=$(grep -o '<!-- website: .* -->' README.md | sed 's/<!-- website: //' | sed 's/ -->//' | head -1)
 
           if [ -z "$website_url" ]; then
