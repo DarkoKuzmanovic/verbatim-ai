@@ -23,6 +23,9 @@ from utils.llm import LLMFormatter
 
 app = FastAPI(title="Verbatim AI", description="YouTube Transcription and AI Formatting Tool")
 
+# Mount static files on main app (for direct access)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Create a sub-application for the /verbatim-ai path
 sub_app = FastAPI(title="Verbatim AI", description="YouTube Transcription and AI Formatting Tool")
 
@@ -65,29 +68,29 @@ async def read_root():
 async def get_transcript(request: TranscriptRequest):
     """Fetch transcript from YouTube video"""
     logger.info(f"Received transcript request for URL: {request.youtube_url}")
-    
+
     try:
         # Extract video ID
         video_id = youtube_fetcher.extract_video_id(request.youtube_url)
         logger.info(f"Extracted video ID: {video_id}")
-        
+
         if not video_id:
             logger.warning(f"Could not extract video ID from URL: {request.youtube_url}")
             return TranscriptResponse(
                 success=False,
                 error="Invalid YouTube URL. Please provide a valid YouTube video URL."
             )
-        
+
         # Fetch transcript
         transcript, error = youtube_fetcher.get_transcript(video_id)
-        
+
         if error:
             logger.error(f"Transcript fetch failed: {error}")
             return TranscriptResponse(success=False, error=error)
-        
+
         logger.info("Transcript fetched successfully")
         return TranscriptResponse(success=True, transcript=transcript)
-        
+
     except Exception as e:
         error_msg = f"Unexpected error in get_transcript: {type(e).__name__}: {str(e)}"
         logger.error(error_msg)
@@ -106,7 +109,7 @@ async def format_transcript(request: FormatRequest):
                 success=False,
                 error="No API key available. Please configure OPENROUTER_API_KEY or provide API key in settings."
             )
-        
+
         # Create a new formatter instance if API key is provided
         if request.api_key:
             from utils.llm import LLMFormatter
@@ -122,12 +125,12 @@ async def format_transcript(request: FormatRequest):
                 llm_formatter.model = request.model
                 logger.info(f"Using custom model: {request.model}")
             formatted_text, error = await llm_formatter.format_transcript(request.raw_transcript)
-        
+
         if error:
             return FormatResponse(success=False, error=error)
-        
+
         return FormatResponse(success=True, formatted_transcript=formatted_text)
-        
+
     except Exception as e:
         return FormatResponse(
             success=False,
