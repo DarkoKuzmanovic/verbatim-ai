@@ -2,6 +2,8 @@
 
 A web-based tool that extracts YouTube video transcripts and formats them into clean, readable documents using AI. Easily deployable on any Linux VPS (Ubuntu/Apache).
 
+![Verbatim AI Screenshot](static/screenshot.png)
+
 ## Features
 
 - 🎥 Extract raw transcripts from YouTube videos
@@ -84,6 +86,20 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
 3. **Verify deployment**:
    - Test `/api/test` endpoint for basic functionality
    - Check `/health` endpoint for configuration status
+
+### Automated Repository Description
+
+The repository description in GitHub's "About" section is automatically updated when the README.md file is modified, thanks to the GitHub Actions workflow in `.github/workflows/update-description.yml`.
+
+To manually update the description:
+
+```bash
+# Set your GitHub token
+export GITHUB_TOKEN=your_github_token_here
+
+# Run the update script
+./update-description.sh
+```
 
 ## Usage
 
