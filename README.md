@@ -1,6 +1,8 @@
 # Verbatim AI
 
-A web-based tool that extracts YouTube video transcripts and formats them into clean, readable documents using AI. Easily deployable on any Linux VPS (Ubuntu/Apache).
+🎥 Extract YouTube transcripts and format them with AI into clean, readable documents. Deployable on any Linux VPS.
+
+<!-- website: https://verbatim.aflux.nl -->
 
 ![Verbatim AI Screenshot](static/screenshot.png)
 
@@ -29,6 +31,7 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
    - Copy `.env.example` to `.env`
    - Get your OpenRouter API key from [https://openrouter.ai/keys](https://openrouter.ai/keys)
    - Add your API key to `.env`:
+
      ```
      OPENROUTER_API_KEY=your_actual_api_key_here
      ```
@@ -91,16 +94,6 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
 
 The repository description in GitHub's "About" section is automatically updated when the README.md file is modified, thanks to the GitHub Actions workflow in `.github/workflows/update-description.yml`.
 
-To manually update the description:
-
-```bash
-# Set your GitHub token
-export GITHUB_TOKEN=your_github_token_here
-
-# Run the update script
-./update-description.sh
-```
-
 ## Usage
 
 1. Paste a YouTube video URL into the input field
@@ -117,12 +110,15 @@ export GITHUB_TOKEN=your_github_token_here
 ### API Routes
 
 - `POST /api/transcript` - Fetch YouTube transcript
+
   ```json
   {
     "youtube_url": "https://www.youtube.com/watch?v=VIDEO_ID"
   }
   ```
+
 - `POST /api/format` - Format transcript with AI
+
   ```json
   {
     "raw_transcript": "transcript text...",

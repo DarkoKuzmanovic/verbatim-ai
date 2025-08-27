@@ -1,0 +1,39 @@
+name: Update Repository Website
+
+on:
+  push:
+    branches: [main]
+    paths: ["README.md"]
+
+jobs:
+  update-website:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract website URL from README
+        id: extract
+        run: |
+          # Look for website URL in README (<!-- website: https://your-site.com -->)
+          website_url=$(grep -o '<!-- website: .* -->' README.md | sed 's/<!-- website: //' | sed 's/ -->//' | head -1)
+
+          if [ -z "$website_url" ]; then
+            echo "No website URL found in README.md"
+            exit 1
+          fi
+
+          echo "website_url=$website_url" >> $GITHUB_OUTPUT
+
+      - name: Update repository website
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const websiteUrl = '${{ steps.extract.outputs.website_url }}';
+
+            await github.rest.repos.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              homepage: websiteUrl
+            });
