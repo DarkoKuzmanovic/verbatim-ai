@@ -33,6 +33,9 @@ except ImportError as e:
 
 app = FastAPI(title="Verbatim AI", description="YouTube Transcription and AI Formatting Tool")
 
+# Create a sub-application for the /verbatim-ai path
+sub_app = FastAPI(title="Verbatim AI", description="YouTube Transcription and AI Formatting Tool")
+
 # Initialize services
 youtube_fetcher = YouTubeTranscriptFetcher()
 llm_formatter = LLMFormatter()
@@ -56,7 +59,7 @@ class FormatResponse(BaseModel):
     formatted_transcript: Optional[str] = None
     error: Optional[str] = None
 
-@app.get("/", response_class=HTMLResponse)
+@sub_app.get("/", response_class=HTMLResponse)
 async def read_root():
     """Serve the web interface"""
     html_content = """
@@ -164,7 +167,7 @@ async def read_root():
     """
     return HTMLResponse(content=html_content)
 
-@app.post("/api/transcript", response_model=TranscriptResponse)
+@sub_app.post("/api/transcript", response_model=TranscriptResponse)
 async def get_transcript(request: TranscriptRequest):
     """Fetch transcript from YouTube video"""
     logger.info(f"Received transcript request for URL: {request.youtube_url}")
@@ -195,7 +198,7 @@ async def get_transcript(request: TranscriptRequest):
         logger.error(error_msg)
         return TranscriptResponse(success=False, error=error_msg)
 
-@app.post("/api/format", response_model=FormatResponse)
+@sub_app.post("/api/format", response_model=FormatResponse)
 async def format_transcript(request: FormatRequest):
     """Format transcript using LLM"""
     logger.info("Received format request")
@@ -242,7 +245,7 @@ async def format_transcript(request: FormatRequest):
         logger.error(error_msg)
         return FormatResponse(success=False, error=error_msg)
 
-@app.get("/health")
+@sub_app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {
@@ -251,10 +254,20 @@ async def health_check():
         "config_valid": Config.validate_config()
     }
 
-@app.get("/api/test")
+@sub_app.get("/api/test")
 async def test_endpoint():
     """Simple test endpoint"""
     return {
         "message": "API is working!"
     }
+
+# Mount the sub-application at /verbatim-ai path
+app.mount("/verbatim-ai", sub_app)
+
+# Redirect root to /verbatim-ai
+@app.get("/")
+async def redirect_to_verbatim():
+    """Redirect root to verbatim-ai application"""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/verbatim-ai/", status_code=301)
 

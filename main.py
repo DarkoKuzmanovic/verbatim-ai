@@ -23,8 +23,11 @@ from utils.llm import LLMFormatter
 
 app = FastAPI(title="Verbatim AI", description="YouTube Transcription and AI Formatting Tool")
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Create a sub-application for the /verbatim-ai path
+sub_app = FastAPI(title="Verbatim AI", description="YouTube Transcription and AI Formatting Tool")
+
+# Mount static files on sub-app
+sub_app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Initialize services
 youtube_fetcher = YouTubeTranscriptFetcher()
@@ -49,7 +52,7 @@ class FormatResponse(BaseModel):
     formatted_transcript: Optional[str] = None
     error: Optional[str] = None
 
-@app.get("/", response_class=HTMLResponse)
+@sub_app.get("/", response_class=HTMLResponse)
 async def read_root():
     """Serve the main HTML page"""
     try:
@@ -58,7 +61,7 @@ async def read_root():
     except FileNotFoundError:
         return HTMLResponse(content="<h1>Static files not found</h1>", status_code=404)
 
-@app.post("/api/transcript", response_model=TranscriptResponse)
+@sub_app.post("/api/transcript", response_model=TranscriptResponse)
 async def get_transcript(request: TranscriptRequest):
     """Fetch transcript from YouTube video"""
     logger.info(f"Received transcript request for URL: {request.youtube_url}")
@@ -93,7 +96,7 @@ async def get_transcript(request: TranscriptRequest):
             error=f"Unexpected error: {str(e)}"
         )
 
-@app.post("/api/format", response_model=FormatResponse)
+@sub_app.post("/api/format", response_model=FormatResponse)
 async def format_transcript(request: FormatRequest):
     """Format transcript using LLM"""
     try:
@@ -131,7 +134,7 @@ async def format_transcript(request: FormatRequest):
             error=f"Unexpected error: {str(e)}"
         )
 
-@app.get("/health")
+@sub_app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {
@@ -139,6 +142,16 @@ async def health_check():
         "openrouter_configured": Config.validate_config()
     }
 
+# Mount the sub-application at /verbatim-ai path
+app.mount("/verbatim-ai", sub_app)
+
+# Redirect root to /verbatim-ai
+@app.get("/")
+async def redirect_to_verbatim():
+    """Redirect root to verbatim-ai application"""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/verbatim-ai/", status_code=301)
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
