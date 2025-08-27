@@ -6,20 +6,24 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
 
 - 🎥 Extract raw transcripts from YouTube videos
 - 🤖 AI-powered formatting with summaries and key topics
-- 🌐 Clean, responsive web interface
+- 🌐 Clean, responsive web interface with modern UI
 - 📋 Copy-to-clipboard functionality
-
+- ⚙️ Advanced settings with custom API keys and model selection
+- 🎨 Dark theme with Material Design components
 - 🛡️ Comprehensive error handling
 - 🔧 Health check and debugging endpoints
+- 💾 Local settings persistence
 
 ## Local Development Setup
 
 1. **Install dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
 
 2. **Configure API key**:
+
    - Copy `.env.example` to `.env`
    - Get your OpenRouter API key from [https://openrouter.ai/keys](https://openrouter.ai/keys)
    - Add your API key to `.env`:
@@ -28,25 +32,41 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
      ```
 
 3. **Run the application**:
+
+   **Option A: Production startup (recommended)**:
+
    ```bash
-   python main.py
+   python start.py
    ```
-   Or using uvicorn directly:
+
+   Or run directly:
+
    ```bash
    uvicorn main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
+   **Option B: Development server**:
+
+   ```bash
+   python main.py
+   ```
+
+   Or using uvicorn directly:
+
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+   ```
+
 4. **Access the application**:
-   Open your browser and go to [http://localhost:8000](http://localhost:8000)
-
-
+   - Production: Open your browser and go to [http://localhost:8000](http://localhost:8000)
+   - Development: Open your browser and go to [http://localhost:8001](http://localhost:8001)
 
 ### Quick Deploy
-
 
 ### Manual Deployment
 
 1. **Prepare for deployment**:
+
    ```bash
    git init
    git add .
@@ -56,15 +76,14 @@ A web-based tool that extracts YouTube video transcripts and formats them into c
    git push -u origin main
    ```
 
+2. **Deploy to your preferred platform**:
 
    - Set environment variable: `OPENROUTER_API_KEY`
-   - Deploy automatically on push to main branch
+   - Deploy as a standard Python web application
 
 3. **Verify deployment**:
    - Test `/api/test` endpoint for basic functionality
    - Check `/health` endpoint for configuration status
-
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
 
 ## Usage
 
@@ -76,9 +95,11 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
 ## API Endpoints
 
 ### Main Interface
+
 - `GET /` - Main web interface
 
 ### API Routes
+
 - `POST /api/transcript` - Fetch YouTube transcript
   ```json
   {
@@ -94,12 +115,14 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
   ```
 
 ### Utility Endpoints
+
 - `GET /health` - Health check and configuration status
 - `GET /api/test` - Simple test endpoint for debugging
 
 ## Error Handling
 
 The application handles various error scenarios:
+
 - Invalid YouTube URLs
 - Videos without available transcripts
 - API configuration issues
@@ -113,32 +136,44 @@ The application handles various error scenarios:
 - **APIs**: YouTube Transcript API, OpenRouter API
 - **AI Model**: Claude 3.5 Sonnet (via OpenRouter)
 
-- **Dependencies**: 
+- **Dependencies**:
+  - `fastapi>=0.104.1` - Modern web framework for building APIs
+  - `uvicorn>=0.24.0` - ASGI web server for FastAPI
   - `youtube-transcript-api>=0.6.2` - YouTube transcript fetching
-  - `httpx` - HTTP client for API calls
-  - `python-dotenv` - Environment variable management
+  - `httpx>=0.25.2` - HTTP client for API calls
+  - `python-multipart>=0.0.6` - Multipart form data handling
+  - `python-dotenv>=1.0.0` - Environment variable management
+  - `mangum>=0.17.0` - AWS Lambda adapter for FastAPI
+  - `asgiref>=3.7.2` - ASGI utilities
 
 ## Project Structure
 
 ```
 ├── api/
-│   └── index.py          # FastAPI app entrypoint
+│   └── index.py          # FastAPI app entry point
 ├── utils/
 │   ├── youtube.py         # YouTube transcript fetching
 │   └── llm.py            # AI formatting logic
-├── static/               # Static files (local dev)
+├── static/               # Static files (HTML, CSS, JS)
+│   ├── index.html        # Main web interface
+│   ├── script.js         # Frontend JavaScript
+│   ├── beer-layout.css   # Custom CSS styles
+│   └── icons/            # UI icons
+├── logs/                 # Application logs
 ├── config.py             # Configuration management
-├── main.py              # Local development server
-
+├── main.py              # Development server (port 8001)
+├── start.py             # Production startup script (port 8000)
 ├── requirements.txt     # Python dependencies
-
+├── .env.example         # Environment variables template
+└── README.md            # This file
 ```
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OPENROUTER_API_KEY` | Your OpenRouter API key | Yes |
-| `OPENROUTER_BASE_URL` | OpenRouter API base URL | No (has default) |
-| `DEFAULT_MODEL` | Default AI model to use | No (has default) |
-| `MAX_TRANSCRIPT_LENGTH` | Maximum transcript length | No (has default) |
+| Variable                | Description                    | Required         |
+| ----------------------- | ------------------------------ | ---------------- |
+| `OPENROUTER_API_KEY`    | Your OpenRouter API key        | Yes              |
+| `OPENROUTER_BASE_URL`   | OpenRouter API base URL        | No (has default) |
+| `DEFAULT_MODEL`         | Default AI model to use        | No (has default) |
+| `MAX_TRANSCRIPT_LENGTH` | Maximum transcript length      | No (has default) |
+| `REQUEST_TIMEOUT`       | API request timeout in seconds | No (has default) |
