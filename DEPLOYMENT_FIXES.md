@@ -68,41 +68,41 @@ When deploying at a sub-path (e.g., `app.quz.ma/verbatim-ai/`), all absolute pat
 
 ```javascript
 class VerbatimAI {
-    constructor() {
-        // Auto-detect base path from current URL
-        this.basePath = this.detectBasePath();
-        this.initializeElements();
-        this.bindEvents();
-        // ... rest of constructor
+  constructor() {
+    // Auto-detect base path from current URL
+    this.basePath = this.detectBasePath();
+    this.initializeElements();
+    this.bindEvents();
+    // ... rest of constructor
+  }
+
+  detectBasePath() {
+    // Get the base path from the current page URL
+    const path = window.location.pathname;
+
+    // If we're at /verbatim-ai/, extract that
+    // If we're at root /, use empty string
+    const match = path.match(/^(\/[^\/]+)?\//);
+
+    if (match && match[1]) {
+      return match[1]; // Returns '/verbatim-ai' or similar
     }
+    return ""; // Returns empty string for root deployment
+  }
 
-    detectBasePath() {
-        // Get the base path from the current page URL
-        const path = window.location.pathname;
+  async fetchTranscript(url) {
+    // ... existing code ...
+    const response = await fetch(`${this.basePath}/api/transcript`, {
+      // ... rest of fetch
+    });
+  }
 
-        // If we're at /verbatim-ai/, extract that
-        // If we're at root /, use empty string
-        const match = path.match(/^(\/[^\/]+)?\//);
-
-        if (match && match[1]) {
-            return match[1]; // Returns '/verbatim-ai' or similar
-        }
-        return ''; // Returns empty string for root deployment
-    }
-
-    async fetchTranscript(url) {
-        // ... existing code ...
-        const response = await fetch(`${this.basePath}/api/transcript`, {
-            // ... rest of fetch
-        });
-    }
-
-    async formatTranscript(rawTranscript) {
-        // ... existing code ...
-        const response = await fetch(`${this.basePath}/api/format`, {
-            // ... rest of fetch
-        });
-    }
+  async formatTranscript(rawTranscript) {
+    // ... existing code ...
+    const response = await fetch(`${this.basePath}/api/format`, {
+      // ... rest of fetch
+    });
+  }
 }
 ```
 
@@ -112,10 +112,10 @@ Add to `static/index.html` before loading script.js:
 
 ```html
 <script>
-    // Set base path for API calls
-    // For root deployment: window.APP_BASE_PATH = '';
-    // For sub-path: window.APP_BASE_PATH = '/verbatim-ai';
-    window.APP_BASE_PATH = '/verbatim-ai';
+  // Set base path for API calls
+  // For root deployment: window.APP_BASE_PATH = '';
+  // For sub-path: window.APP_BASE_PATH = '/verbatim-ai';
+  window.APP_BASE_PATH = "/verbatim-ai";
 </script>
 <script src="/static/script.js"></script>
 ```
@@ -209,7 +209,7 @@ REQUEST_TIMEOUT=240
 
 **Update `.gitignore` to include:**
 
-```
+```bash
 .env
 .env.local
 ```
@@ -244,7 +244,7 @@ class Config:
 
 **Create `docs/DEPLOYMENT.md`:**
 
-```markdown
+````markdown
 # Deployment Guide
 
 ## Quick Start (Local Development)
@@ -262,11 +262,13 @@ class Config:
 Deploy at domain root (e.g., `example.com/`)
 
 **Configuration:**
+
 ```bash
 # .env
 BASE_PATH=""
 REQUEST_TIMEOUT=240
 ```
+````
 
 **Nginx config:**
 
@@ -316,7 +318,7 @@ proxy_read_timeout 300s;
 
 No changes needed - `api/index.py` handles this automatically.
 
-```
+````bash
 
 ---
 
@@ -367,7 +369,7 @@ If you want to keep the current deployment working at `/verbatim-ai/` but make i
 **1. Add to `config.py`:**
 ```python
 BASE_PATH: str = os.getenv("BASE_PATH", "/verbatim-ai")
-```
+````
 
 **2. Update `main.py` line 24:**
 
@@ -383,7 +385,7 @@ app = FastAPI(
 
 ```javascript
 // Auto-detect base path from current URL
-const BASE_PATH = window.location.pathname.split('/')[1] ? '/' + window.location.pathname.split('/')[1] : '';
+const BASE_PATH = window.location.pathname.split("/")[1] ? "/" + window.location.pathname.split("/")[1] : "";
 ```
 
 **4. Update API calls in `script.js`:**

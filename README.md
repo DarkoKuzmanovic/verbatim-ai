@@ -32,7 +32,7 @@
    - Get your OpenRouter API key from [https://openrouter.ai/keys](https://openrouter.ai/keys)
    - Add your API key to `.env`:
 
-     ```
+     ```bash
      OPENROUTER_API_KEY=your_actual_api_key_here
      ```
 
@@ -66,29 +66,28 @@
    - Production: Open your browser and go to [http://localhost:8000](http://localhost:8000)
    - Development: Open your browser and go to [http://localhost:8001](http://localhost:8001)
 
-### Quick Deploy
+## Deployment
 
-### Manual Deployment
+This application is designed for flexible deployment. It can be run at the root of a domain (e.g., `http://example.com`) or under a sub-path (e.g., `http://example.com/verbatim-ai`).
 
-1. **Prepare for deployment**:
+This is controlled by the `BASE_PATH` environment variable.
 
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin <your-github-repo-url>
-   git push -u origin main
-   ```
+- **For root deployment**: Set `BASE_PATH=""` in your `.env` file.
+- **For sub-path deployment**: Set `BASE_PATH="/your-sub-path"` in your `.env` file.
 
-2. **Deploy to your preferred platform**:
+For detailed instructions on setting up with Nginx, running locally, or deploying on platforms like Vercel, please see the **[Deployment Guide](docs/DEPLOYMENT.md)**.
 
-   - Set environment variable: `OPENROUTER_API_KEY`
-   - Deploy as a standard Python web application
+### Nginx Helper Script
 
-3. **Verify deployment**:
-   - Test `/api/test` endpoint for basic functionality
-   - Check `/health` endpoint for configuration status
+To simplify deployment with Nginx, you can use the `deploy.sh` script to automatically generate a suitable `nginx.conf` file based on your `.env` configuration.
+
+```bash
+# Make the script executable
+chmod +x deploy.sh
+
+# Run the script to generate generated_nginx.conf
+./deploy.sh
+```
 
 ### Automated Repository Description
 
@@ -160,32 +159,35 @@ The application handles various error scenarios:
 
 ## Project Structure
 
-```
+```tree
 ├── api/
-│   └── index.py          # FastAPI app entry point
+│   └── index.py          # FastAPI app entry point for Vercel
+├── docs/
+│   └── DEPLOYMENT.md     # Detailed deployment guide
 ├── utils/
-│   ├── youtube.py         # YouTube transcript fetching
+│   ├── youtube.py        # YouTube transcript fetching
 │   └── llm.py            # AI formatting logic
 ├── static/               # Static files (HTML, CSS, JS)
 │   ├── index.html        # Main web interface
 │   ├── script.js         # Frontend JavaScript
 │   ├── beer-layout.css   # Custom CSS styles
 │   └── icons/            # UI icons
-├── logs/                 # Application logs
 ├── config.py             # Configuration management
-├── main.py              # Development server (port 8001)
-├── start.py             # Production startup script (port 8000)
-├── requirements.txt     # Python dependencies
-├── .env.example         # Environment variables template
-└── README.md            # This file
+├── main.py               # Development server (port 8001)
+├── start.py              # Production startup script (port 8000)
+├── requirements.txt      # Python dependencies
+├── .env.example          # Environment variables template
+├── deploy.sh             # Deployment helper script (e.g., for Nginx)
+└── README.md             # This file
 ```
 
 ## Environment Variables
 
-| Variable                | Description                    | Required         |
-| ----------------------- | ------------------------------ | ---------------- |
-| `OPENROUTER_API_KEY`    | Your OpenRouter API key        | Yes              |
-| `OPENROUTER_BASE_URL`   | OpenRouter API base URL        | No (has default) |
-| `DEFAULT_MODEL`         | Default AI model to use        | No (has default) |
-| `MAX_TRANSCRIPT_LENGTH` | Maximum transcript length      | No (has default) |
-| `REQUEST_TIMEOUT`       | API request timeout in seconds | No (has default) |
+| Variable                | Description                                     | Required         |
+| ----------------------- | ----------------------------------------------- | ---------------- |
+| `OPENROUTER_API_KEY`    | Your OpenRouter API key                         | Yes              |
+| `BASE_PATH`             | Deployment sub-path (e.g., `/verbatim-ai`)      | No (defaults to `""`) |
+| `OPENROUTER_BASE_URL`   | OpenRouter API base URL                         | No (has default) |
+| `DEFAULT_MODEL`         | Default AI model to use                         | No (has default) |
+| `MAX_TRANSCRIPT_LENGTH` | Maximum transcript length                       | No (has default) |
+| `REQUEST_TIMEOUT`       | API request timeout in seconds                  | No (has default) |
