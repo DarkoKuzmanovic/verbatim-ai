@@ -18,7 +18,7 @@ class VerbatimAI {
         this.rawTranscriptArea = document.getElementById('raw-transcript');
         this.formattedTranscriptDiv = document.getElementById('formatted-transcript');
         this.formattedSection = document.getElementById('formatted-section');
-        
+
         // Loading indicators
         this.rawLoading = document.getElementById('raw-transcript-loading');
         this.formattedLoading = document.getElementById('formatted-transcript-loading');
@@ -26,7 +26,7 @@ class VerbatimAI {
         // Copy buttons
         this.copyRawBtn = document.getElementById('copy-raw-btn');
         this.copyFormattedBtn = document.getElementById('copy-formatted-btn');
-        
+
         // Model selection
         this.modelSelect = document.getElementById('model-select');
 
@@ -42,7 +42,7 @@ class VerbatimAI {
         // Settings modal elements
         this.settingsBtn = document.getElementById('settings-btn');
         this.settingsModal = document.getElementById('settings-modal');
-        
+
         if (!this.settingsBtn) {
             console.error('Settings button not found!');
         }
@@ -68,7 +68,7 @@ class VerbatimAI {
         this.copyRawBtn.addEventListener('click', () => this.copyToClipboard(this.rawTranscript, 'Raw transcript'));
         this.copyFormattedBtn.addEventListener('click', () => this.copyToClipboard(this.formattedTranscript, 'Formatted transcript'));
         this.errorDismiss.addEventListener('click', () => this.hideError());
-        
+
         // Settings modal events
         this.settingsBtn.addEventListener('click', () => {
             console.log('Settings button clicked');
@@ -81,14 +81,14 @@ class VerbatimAI {
         this.clearApiKeyBtn.addEventListener('click', () => this.clearApiKey());
         this.addModelBtn.addEventListener('click', () => this.addCustomModel());
         this.resetSettingsBtn.addEventListener('click', () => this.resetSettings());
-        
+
         // Close modal when clicking backdrop
         this.settingsModal.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal-backdrop')) {
                 this.closeSettings();
             }
         });
-        
+
         // Allow Enter key to trigger transcript fetch
         this.urlInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -103,7 +103,7 @@ class VerbatimAI {
                 e.preventDefault();
                 this.formatTranscript();
             }
-            
+
             // Escape to dismiss error
             if (e.key === 'Escape' && !this.errorDisplay.classList.contains('hidden')) {
                 this.hideError();
@@ -117,7 +117,7 @@ class VerbatimAI {
             apiKey: '',
             customModels: []
         };
-        
+
         try {
             const saved = localStorage.getItem('verbatim-ai-settings');
             return saved ? {...defaultSettings, ...JSON.parse(saved)} : defaultSettings;
@@ -141,19 +141,19 @@ class VerbatimAI {
         console.log('Modal element:', this.settingsModal);
         console.log('Modal exists:', !!this.settingsModal);
         console.log('Modal classes before:', this.settingsModal?.className);
-        
+
         if (!this.settingsModal) {
             console.error('Settings modal element not found!');
             return;
         }
-        
+
         this.settingsModal.classList.remove('hidden');
-        
+
         console.log('Modal classes after:', this.settingsModal.className);
         console.log('Modal computed display:', window.getComputedStyle(this.settingsModal).display);
         console.log('Modal computed opacity:', window.getComputedStyle(this.settingsModal).opacity);
         console.log('Modal computed visibility:', window.getComputedStyle(this.settingsModal).visibility);
-        
+
         this.populateSettingsModal();
         document.body.style.overflow = 'hidden';
     }
@@ -167,7 +167,7 @@ class VerbatimAI {
         // Load API key (masked)
         this.apiKeyInput.value = this.settings.apiKey ? '••••••••••••••••' : '';
         this.apiKeyInput.dataset.hasKey = this.settings.apiKey ? 'true' : 'false';
-        
+
         // Load custom models
         this.renderCustomModels();
     }
@@ -212,28 +212,28 @@ class VerbatimAI {
     addCustomModel() {
         const modelId = this.modelIdInput.value.trim();
         const modelName = this.modelNameInput.value.trim();
-        
+
         if (!modelId || !modelName) {
             this.showError('Please enter both model ID and display name');
             return;
         }
-        
+
         // Check if model already exists
         if (this.settings.customModels.find(m => m.id === modelId)) {
             this.showError('Model already exists');
             return;
         }
-        
+
         // Add model
         this.settings.customModels.push({ id: modelId, name: modelName });
         this.saveSettings();
-        
+
         // Clear inputs and refresh display
         this.modelIdInput.value = '';
         this.modelNameInput.value = '';
         this.renderCustomModels();
         this.loadModels(); // Refresh the dropdown
-        
+
         this.showToast('Model added successfully!');
     }
 
@@ -250,7 +250,7 @@ class VerbatimAI {
             this.customModelsContainer.innerHTML = '<p style="opacity: 0.6; font-style: italic;">No custom models added yet.</p>';
             return;
         }
-        
+
         this.customModelsContainer.innerHTML = this.settings.customModels.map(model => `
             <div class="model-item">
                 <div class="model-info">
@@ -310,15 +310,15 @@ class VerbatimAI {
         try {
             const response = await fetch('/static/models.md');
             const text = await response.text();
-            
+
             const models = [];
             const lines = text.split('\n').filter(line => line.trim());
-            
+
             for (const line of lines) {
                 if (line.includes(':')) {
                     const modelId = line.trim();
                     let displayName = modelId;
-                    
+
                     // Create human-readable names
                     if (modelId.includes('openai/gpt-oss-20b')) {
                         displayName = 'GPT OSS 20B (Free)';
@@ -333,21 +333,21 @@ class VerbatimAI {
                     } else if (modelId.includes('deepseek/deepseek-r1-0528')) {
                         displayName = 'DeepSeek R1 (Free)';
                     }
-                    
+
                     models.push({ id: modelId, name: displayName });
                 }
             }
-            
+
             // Clear existing options and add new ones
             this.modelSelect.innerHTML = '';
-            
+
             // Add default option
             const defaultOption = document.createElement('option');
             defaultOption.value = 'anthropic/claude-3.5-sonnet';
             defaultOption.textContent = 'Claude 3.5 Sonnet (Default)';
             defaultOption.selected = true;
             this.modelSelect.appendChild(defaultOption);
-            
+
             // Add models from file
             models.forEach(model => {
                 const option = document.createElement('option');
@@ -355,14 +355,14 @@ class VerbatimAI {
                 option.textContent = model.name;
                 this.modelSelect.appendChild(option);
             });
-            
+
             // Add custom models from localStorage
             if (this.settings.customModels.length > 0) {
                 const separator = document.createElement('option');
                 separator.disabled = true;
                 separator.textContent = '--- Custom Models ---';
                 this.modelSelect.appendChild(separator);
-                
+
                 this.settings.customModels.forEach(model => {
                     const option = document.createElement('option');
                     option.value = model.id;
@@ -370,7 +370,7 @@ class VerbatimAI {
                     this.modelSelect.appendChild(option);
                 });
             }
-            
+
         } catch (error) {
             console.error('Failed to load models:', error);
             // Fallback to default models
@@ -386,12 +386,12 @@ class VerbatimAI {
     showError(message) {
         this.errorMessage.textContent = message;
         this.errorDisplay.classList.remove('hidden');
-        
+
         // Clear existing timeout
         if (this.errorTimeout) {
             clearTimeout(this.errorTimeout);
         }
-        
+
         // Auto-hide after 15 seconds for better readability
         this.errorTimeout = setTimeout(() => {
             this.hideError();
@@ -409,7 +409,7 @@ class VerbatimAI {
     showToast(message) {
         this.toastMessage.textContent = message;
         this.toast.classList.remove('hidden');
-        
+
         // Auto-hide after 3 seconds
         setTimeout(() => {
             this.toast.classList.add('hidden');
@@ -446,7 +446,7 @@ class VerbatimAI {
 
     async fetchTranscript() {
         const url = this.urlInput.value.trim();
-        
+
         if (!url) {
             this.showError('Please enter a YouTube URL');
             return;
@@ -456,7 +456,7 @@ class VerbatimAI {
         this.setLoading(true, true);
 
         try {
-            const response = await fetch('/api/transcript', {
+            const response = await fetch('api/transcript', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -471,7 +471,7 @@ class VerbatimAI {
                 this.rawTranscriptArea.value = this.rawTranscript;
                 this.copyRawBtn.disabled = false;
                 this.formatBtn.disabled = false;
-                
+
                 // Clear previous formatted result
                 this.formattedTranscriptDiv.innerHTML = '<p style="opacity: 0.6; font-style: italic;">Click "Format with AI" to process this transcript...</p>';
                 this.copyFormattedBtn.disabled = true;
@@ -501,17 +501,17 @@ class VerbatimAI {
 
         try {
             const selectedModel = this.modelSelect.value;
-            const requestBody = { 
+            const requestBody = {
                 raw_transcript: this.rawTranscript,
-                model: selectedModel 
+                model: selectedModel
             };
-            
+
             // Add API key if stored in settings
             if (this.settings.apiKey) {
                 requestBody.api_key = this.settings.apiKey;
             }
-            
-            const response = await fetch('/api/format', {
+
+            const response = await fetch('api/format', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -523,7 +523,7 @@ class VerbatimAI {
 
             if (data.success) {
                 this.formattedTranscript = data.formatted_transcript;
-                
+
                 // Convert markdown to HTML for better display
                 const htmlContent = this.markdownToHtml(this.formattedTranscript);
                 this.formattedTranscriptDiv.innerHTML = htmlContent;
@@ -583,7 +583,7 @@ class VerbatimAI {
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.verbatimAI = new VerbatimAI();
-    
+
     // Add debug function to global scope for testing
     window.testModal = function() {
         console.log('Testing modal manually...');
@@ -596,14 +596,14 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Modal not found!');
         }
     };
-    
+
     // Check for localhost vs IP access and warn about settings differences
     const origin = window.location.origin;
     if (origin.includes('127.0.0.1') || origin.includes('localhost')) {
         console.log(`Note: Settings are stored per origin. localhost and 127.0.0.1 have separate settings.`);
         console.log(`Current origin: ${origin}`);
     }
-    
+
     console.log('VerbatimAI initialized. Settings button:', document.getElementById('settings-btn'));
     console.log('Settings modal:', document.getElementById('settings-modal'));
 });

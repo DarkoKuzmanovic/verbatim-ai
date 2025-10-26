@@ -11,10 +11,12 @@ This document explains the issues we encountered during deployment and provides 
 **Problem:** The frontend code assumed the app runs at root path `/`
 
 **Files affected:**
+
 - `static/script.js` (lines 459, 514)
 - `static/index.html` (multiple lines)
 
 **What broke:**
+
 - API calls: `/api/transcript` → Should be `/verbatim-ai/api/transcript`
 - Static files: `/static/...` → Should be `/verbatim-ai/static/...`
 
@@ -28,6 +30,7 @@ When deploying at a sub-path (e.g., `app.quz.ma/verbatim-ai/`), all absolute pat
 **Problem:** No `.env.example` file in repository
 
 **What broke:**
+
 - `start.py` referenced `.env.example` but file didn't exist
 - New users don't know what environment variables to configure
 - No guidance on where to get API keys
@@ -39,6 +42,7 @@ When deploying at a sub-path (e.g., `app.quz.ma/verbatim-ai/`), all absolute pat
 **Problem:** 30-second timeout insufficient for AI API calls
 
 **What broke:**
+
 - AI formatting requests timed out (504 Gateway Timeout)
 - Long transcripts couldn't be processed
 
@@ -49,6 +53,7 @@ When deploying at a sub-path (e.g., `app.quz.ma/verbatim-ai/`), all absolute pat
 **Problem:** No guidance for reverse proxy deployment
 
 **What broke:**
+
 - Static file routing
 - API endpoint routing
 - Timeout configurations
@@ -116,6 +121,7 @@ Add to `static/index.html` before loading script.js:
 ```
 
 Then in `script.js`:
+
 ```javascript
 const BASE_PATH = window.APP_BASE_PATH || '';
 fetch(`${BASE_PATH}/api/transcript`, ...)
@@ -202,12 +208,14 @@ REQUEST_TIMEOUT=240
 ```
 
 **Update `.gitignore` to include:**
+
 ```
 .env
 .env.local
 ```
 
 **But keep `.env.example` in git:**
+
 ```bash
 git add -f .env.example
 ```
@@ -261,6 +269,7 @@ REQUEST_TIMEOUT=240
 ```
 
 **Nginx config:**
+
 ```nginx
 location / {
     proxy_pass http://localhost:8000/;
@@ -273,6 +282,7 @@ location / {
 Deploy at a sub-path (e.g., `example.com/verbatim-ai/`)
 
 **Configuration:**
+
 ```bash
 # .env
 BASE_PATH="/verbatim-ai"
@@ -280,6 +290,7 @@ REQUEST_TIMEOUT=240
 ```
 
 **Nginx config:**
+
 ```nginx
 location /verbatim-ai/ {
     proxy_pass http://localhost:8000/verbatim-ai/;
@@ -304,6 +315,7 @@ proxy_read_timeout 300s;
 ## Vercel Deployment
 
 No changes needed - `api/index.py` handles this automatically.
+
 ```
 
 ---
@@ -358,6 +370,7 @@ BASE_PATH: str = os.getenv("BASE_PATH", "/verbatim-ai")
 ```
 
 **2. Update `main.py` line 24:**
+
 ```python
 app = FastAPI(
     title="Verbatim AI",
@@ -367,12 +380,14 @@ app = FastAPI(
 ```
 
 **3. Add to `static/script.js` at the top:**
+
 ```javascript
 // Auto-detect base path from current URL
 const BASE_PATH = window.location.pathname.split('/')[1] ? '/' + window.location.pathname.split('/')[1] : '';
 ```
 
 **4. Update API calls in `script.js`:**
+
 ```javascript
 // Line 459:
 const response = await fetch(`${BASE_PATH}/api/transcript`, {
@@ -399,12 +414,14 @@ After implementing flexibility improvements, test these scenarios:
 ## Summary
 
 The main issues were:
+
 - ❌ Hardcoded absolute paths in frontend (`/api/...`, `/static/...`)
 - ❌ No environment configuration examples (`.env.example`)
 - ❌ Timeout too short for AI processing (30s → 240s)
 - ❌ Missing deployment documentation
 
 The solutions:
+
 - ✅ Make paths configurable via `BASE_PATH` environment variable
 - ✅ Add `.env.example` to repository
 - ✅ Increase default timeout to 240 seconds
