@@ -110,19 +110,19 @@ git diff
 
 #### Step 3: Stage files (prepare them for commit)
 
-**Option A: Add specific files**
+##### **Option A: Add specific files**
 
 ```bash
 git add file1.txt file2.py file3.js
 ```
 
-**Option B: Add all changed files**
+##### **Option B: Add all changed files**
 
 ```bash
 git add .
 ```
 
-**Option C: Add only certain types**
+##### **Option C: Add only certain types**
 
 ```bash
 git add *.py          # All Python files
@@ -510,7 +510,7 @@ git fetch && git log HEAD..origin/main --oneline  # See what's new
 
 Follow this format:
 
-```
+```bash
 [Type] Short description (50 chars max)
 
 Longer explanation if needed (wrap at 72 chars)
