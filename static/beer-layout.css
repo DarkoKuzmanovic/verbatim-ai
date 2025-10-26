@@ -89,12 +89,16 @@ input[type="url"] {
 /* Better textarea styling */
 textarea {
   font-family: "Consolas", "Monaco", "Courier New", monospace;
-  font-size: 14px;
-  line-height: 1.4;
-  resize: vertical;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+  }
+
+  input, textarea, select {
+    font-family: "Consolas", "Monaco", "Courier New", monospace !important;
+    font-size: 14px;
+    line-height: 1.4;
+    resize: vertical;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 
 /* Select styling */
 select {
