@@ -89,6 +89,18 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 
+### Automated Update Script
+
+The `update.sh` script automates the process of pulling the latest changes and restarting the application on a production server.
+
+```bash
+# Make the script executable (run once)
+chmod +x update.sh
+
+# Run the update script
+./update.sh
+```
+
 ### Automated Repository Description
 
 The repository description in GitHub's "About" section is automatically updated when the README.md file is modified, thanks to the GitHub Actions workflow in `.github/workflows/update-description.yml`.
@@ -178,6 +190,7 @@ The application handles various error scenarios:
 ├── requirements.txt      # Python dependencies
 ├── .env.example          # Environment variables template
 ├── deploy.sh             # Deployment helper script (e.g., for Nginx)
+├── update.sh             # Automated server update script
 └── README.md             # This file
 ```
 

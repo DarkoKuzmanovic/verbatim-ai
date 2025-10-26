@@ -66,6 +66,35 @@ proxy_send_timeout 300s;
 proxy_read_timeout 300s;
 ```
 
+## Automated Update Process
+
+The [`update.sh`](../update.sh) script is the recommended way to update the production server. This script automates the deployment process and includes health checks to ensure the update was successful.
+
+### Using the Update Script
+
+```bash
+# Make the script executable
+chmod +x update.sh
+
+# Run the update
+./update.sh
+```
+
+### What the Script Does
+
+The update script performs the following operations:
+
+1. **Stashes local changes** - Any uncommitted changes are automatically stashed
+2. **Pulls latest changes** - Fetches updates from the `origin/main` branch
+3. **Updates dependencies** - If [`requirements.txt`](../requirements.txt) has changed
+4. **Checks for new environment variables** - Compares [`.env.example`](../.env.example) with your current [`.env`](../.env) file
+5. **Restarts the application** - Stops any running uvicorn processes and starts a new one
+6. **Performs health checks** - Verifies the application is running locally and publicly accessible
+
+### Configuration
+
+The script is configured for the production environment at `/var/www/app.quz.ma/verbatim-ai`. You may need to update the `APP_DIR` variable in the script to match your deployment directory.
+
 ## Vercel Deployment
 
 No changes needed - `api/index.py` handles this automatically.

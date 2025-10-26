@@ -1,5 +1,37 @@
 # Production Server Update Guide
 
+## Automated Update Script
+
+For a streamlined and automated update process, you can use the provided `update.sh` script. This script handles all the steps of the deployment process, including stashing changes, pulling updates, managing dependencies, and restarting the server.
+
+### How to Use the `update.sh` Script
+
+1. **Make the script executable (one-time setup):**
+
+    ```bash
+    chmod +x update.sh
+    ```
+
+2. **Run the script from your project directory on the production server:**
+
+    ```bash
+    ./update.sh
+    ```
+
+### What the Script Does
+
+The script automates the following steps:
+
+- Stashes any local changes on the server.
+- Pulls the latest code from the `main` branch on GitHub.
+- Checks if `requirements.txt` has changed and updates Python dependencies if necessary.
+- Compares `.env.example` with your `.env` file and notifies you of any new environment variables that need to be added manually.
+- Restarts the application using `pkill` and `nohup`.
+- Performs health checks on both the local and public endpoints to verify the update was successful.
+- Provides colored output for better readability.
+
+---
+
 ## Quick Reference
 
 ### Push from Local Computer → GitHub
@@ -209,6 +241,14 @@ git add . && git commit -m "Your message" && git push origin main
 ```
 
 ### Quick Pull and Restart (Production Server)
+
+**Recommended:** Use the automated script for a safer update:
+
+```bash
+./update.sh
+```
+
+**Manual one-liner:**
 
 ```bash
 git stash && git pull origin main && pip install -r requirements.txt && pkill -9 -f uvicorn && nohup bash start.sh > /tmp/verbatim-ai.log 2>&1 &
