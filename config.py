@@ -10,7 +10,7 @@ class Config:
     DEFAULT_MODEL: str = "anthropic/claude-3.5-sonnet"
 
     # API settings
-    REQUEST_TIMEOUT: int = 30
+    REQUEST_TIMEOUT: int = 240  # Increased for AI processing (4 minutes)
     MAX_TRANSCRIPT_LENGTH: int = 50000  # characters
 
     @classmethod

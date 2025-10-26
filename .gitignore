@@ -57,6 +57,7 @@ logs/*.json
 # Ignore environment files (contain secrets)
 .env
 .env.*
+!.env.example
 
 # Compiled python files
 *.pyc
