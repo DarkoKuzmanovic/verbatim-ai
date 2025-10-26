@@ -2,7 +2,7 @@
 
 🎥 Extract YouTube transcripts and format them with AI into clean, readable documents. Deployable on any Linux VPS.
 
-<!-- website: https://verbatim.aflux.nl -->
+<!-- website: https://app.quz.ma/verbatim-ai/ -->
 
 ![Verbatim AI Screenshot](static/screenshot.png)
 
@@ -183,11 +183,11 @@ The application handles various error scenarios:
 
 ## Environment Variables
 
-| Variable                | Description                                     | Required         |
-| ----------------------- | ----------------------------------------------- | ---------------- |
-| `OPENROUTER_API_KEY`    | Your OpenRouter API key                         | Yes              |
-| `BASE_PATH`             | Deployment sub-path (e.g., `/verbatim-ai`)      | No (defaults to `""`) |
-| `OPENROUTER_BASE_URL`   | OpenRouter API base URL                         | No (has default) |
-| `DEFAULT_MODEL`         | Default AI model to use                         | No (has default) |
-| `MAX_TRANSCRIPT_LENGTH` | Maximum transcript length                       | No (has default) |
-| `REQUEST_TIMEOUT`       | API request timeout in seconds                  | No (has default) |
+| Variable                | Description                                | Required              |
+| ----------------------- | ------------------------------------------ | --------------------- |
+| `OPENROUTER_API_KEY`    | Your OpenRouter API key                    | Yes                   |
+| `BASE_PATH`             | Deployment sub-path (e.g., `/verbatim-ai`) | No (defaults to `""`) |
+| `OPENROUTER_BASE_URL`   | OpenRouter API base URL                    | No (has default)      |
+| `DEFAULT_MODEL`         | Default AI model to use                    | No (has default)      |
+| `MAX_TRANSCRIPT_LENGTH` | Maximum transcript length                  | No (has default)      |
+| `REQUEST_TIMEOUT`       | API request timeout in seconds             | No (has default)      |
