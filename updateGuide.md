@@ -3,6 +3,7 @@
 ## Quick Reference
 
 ### Push from Local Computer → GitHub
+
 ```bash
 git add .
 git commit -m "Your descriptive message"
@@ -10,6 +11,7 @@ git push origin main
 ```
 
 ### Pull from GitHub → Production Server
+
 ```bash
 git stash  # Save local changes
 git pull origin main
@@ -24,6 +26,7 @@ pkill -9 -f uvicorn && nohup bash start.sh > /tmp/verbatim-ai.log 2>&1 &  # Rest
 ### Step-by-Step: Updating Production Server
 
 #### Step 1: Save any local server changes
+
 ```bash
 git stash push -m "Server local changes"
 ```
@@ -31,6 +34,7 @@ git stash push -m "Server local changes"
 This temporarily saves any uncommitted changes you made on the server.
 
 #### Step 2: Pull latest changes from GitHub
+
 ```bash
 git pull origin main
 ```
@@ -38,6 +42,7 @@ git pull origin main
 This downloads and applies all changes from your GitHub repository.
 
 #### Step 3: Update dependencies (if requirements.txt changed)
+
 ```bash
 source venv/bin/activate
 pip install -r requirements.txt
@@ -46,6 +51,7 @@ pip install -r requirements.txt
 Only needed if you see `requirements.txt` in the changed files.
 
 #### Step 4: Update .env file if needed
+
 ```bash
 # Check what new variables were added
 cat .env.example
@@ -57,6 +63,7 @@ nano .env
 Compare `.env.example` with your `.env` and add any missing variables.
 
 #### Step 5: Restart the application
+
 ```bash
 pkill -9 -f "uvicorn.*main:app"
 nohup bash start.sh > /tmp/verbatim-ai.log 2>&1 &
@@ -65,6 +72,7 @@ nohup bash start.sh > /tmp/verbatim-ai.log 2>&1 &
 Stops the old version and starts the new one.
 
 #### Step 6: Verify it's working
+
 ```bash
 curl http://localhost:8000/health
 curl https://app.quz.ma/verbatim-ai/health
@@ -79,16 +87,19 @@ Both should return: `{"status":"healthy","openrouter_configured":true}`
 ### Step-by-Step: Pushing Changes from Local Computer
 
 #### Step 1: Check what changed
+
 ```bash
 git status
 ```
 
 Shows:
+
 - **Modified files** (files you changed)
 - **Untracked files** (new files not in git yet)
 - **Deleted files**
 
 #### Step 2: Review your changes (optional but recommended)
+
 ```bash
 # See what you changed in specific files
 git diff filename.txt
@@ -100,42 +111,50 @@ git diff
 #### Step 3: Stage files (prepare them for commit)
 
 **Option A: Add specific files**
+
 ```bash
 git add file1.txt file2.py file3.js
 ```
 
 **Option B: Add all changed files**
+
 ```bash
 git add .
 ```
 
 **Option C: Add only certain types**
+
 ```bash
 git add *.py          # All Python files
 git add src/          # Everything in src folder
 ```
 
 #### Step 4: Commit with a message
+
 ```bash
 git commit -m "Your descriptive message here"
 ```
 
 **Good commit messages:**
+
 - ✅ "Fix timeout issue in AI formatting"
 - ✅ "Add user authentication feature"
 - ✅ "Update README with deployment instructions"
 
 **Bad commit messages:**
+
 - ❌ "update"
 - ❌ "fixes"
 - ❌ "changes"
 
 #### Step 5: Push to GitHub
+
 ```bash
 git push origin main
 ```
 
 Or simply:
+
 ```bash
 git push
 ```
@@ -184,11 +203,13 @@ tail -f /tmp/verbatim-ai.log
 ## One-Liner Commands
 
 ### Quick Push (Local Computer)
+
 ```bash
 git add . && git commit -m "Your message" && git push origin main
 ```
 
 ### Quick Pull and Restart (Production Server)
+
 ```bash
 git stash && git pull origin main && pip install -r requirements.txt && pkill -9 -f uvicorn && nohup bash start.sh > /tmp/verbatim-ai.log 2>&1 &
 ```
@@ -198,6 +219,7 @@ git stash && git pull origin main && pip install -r requirements.txt && pkill -9
 ## Common Scenarios
 
 ### Scenario 1: You changed existing files on local computer
+
 ```bash
 # On local computer
 git add .
@@ -210,6 +232,7 @@ pkill -9 -f uvicorn && nohup bash start.sh > /tmp/verbatim-ai.log 2>&1 &
 ```
 
 ### Scenario 2: You added new files on local computer
+
 ```bash
 # On local computer
 git add .  # Adds new files
@@ -224,6 +247,7 @@ pkill -9 -f uvicorn && nohup bash start.sh > /tmp/verbatim-ai.log 2>&1 &
 ```
 
 ### Scenario 3: You deleted files
+
 ```bash
 # On local computer
 git add .  # Stages deletions too
@@ -236,6 +260,7 @@ pkill -9 -f uvicorn && nohup bash start.sh > /tmp/verbatim-ai.log 2>&1 &
 ```
 
 ### Scenario 4: Undo unstaged changes (be careful!)
+
 ```bash
 git restore filename.txt  # Discard changes to one file
 git restore .             # Discard ALL changes (DANGER!)
@@ -246,12 +271,14 @@ git restore .             # Discard ALL changes (DANGER!)
 ## Useful Git Commands
 
 ### Check if GitHub has updates
+
 ```bash
 git fetch origin
 git log HEAD..origin/main --oneline
 ```
 
 ### See what changed
+
 ```bash
 git diff HEAD origin/main        # Before pulling - see what will change
 git log -5 --oneline             # After pulling - see recent commits
@@ -259,6 +286,7 @@ git show <commit-hash>           # See details of specific commit
 ```
 
 ### Working with stash
+
 ```bash
 git stash list                   # See all stashed changes
 git stash pop                    # Apply and remove latest stash
@@ -268,6 +296,7 @@ git stash clear                  # Delete all stashes
 ```
 
 ### Branch management
+
 ```bash
 git branch                       # List local branches
 git branch -a                    # List all branches (including remote)
@@ -276,6 +305,7 @@ git checkout main                # Switch back to main
 ```
 
 ### View history
+
 ```bash
 git log --oneline -10            # Last 10 commits
 git log --graph --oneline        # Visual branch history
@@ -299,11 +329,13 @@ git log --since="2 weeks ago"    # Recent commits
 - ✅ Did you test your changes?
 - ✅ Is your commit message descriptive?
 - ✅ Did you accidentally include sensitive files (.env, passwords)?
+
   ```bash
   # Check what you're committing
   git status
   git diff --cached
   ```
+
 - ✅ Are you on the right branch? (`git branch`)
 
 ---
@@ -337,6 +369,7 @@ pkill -9 -f uvicorn && nohup bash start.sh > /tmp/verbatim-ai.log 2>&1 &
 ```
 
 **Better approach - Avoid conflicts:**
+
 ```bash
 git stash              # Save your changes
 git pull origin main   # Pull cleanly
@@ -349,18 +382,21 @@ git stash pop          # Reapply your changes
 ## Troubleshooting
 
 ### Problem: "Your branch is behind origin/main"
+
 ```bash
 # Solution: Pull the latest changes
 git pull origin main
 ```
 
 ### Problem: "Your branch is ahead of origin/main"
+
 ```bash
 # Solution: You have local commits, push them
 git push origin main
 ```
 
 ### Problem: "fatal: could not read Username"
+
 ```bash
 # Solution: You need to authenticate
 # Use SSH (already set up):
@@ -369,6 +405,7 @@ git remote -v
 ```
 
 ### Problem: Application won't start after pull
+
 ```bash
 # Check the logs
 tail -f /tmp/verbatim-ai.log
@@ -390,6 +427,7 @@ chmod +x start.sh
 ```
 
 ### Problem: Nginx shows 502 Bad Gateway
+
 ```bash
 # Check if app is running
 curl http://localhost:8000/health
@@ -403,6 +441,7 @@ tail -f /var/log/nginx/error.log
 ```
 
 ### Problem: Static files not loading
+
 ```bash
 # Check nginx configuration
 sudo nginx -t
@@ -419,16 +458,19 @@ ls -la static/
 ## Monitoring Your Application
 
 ### Check if app is running
+
 ```bash
 ps aux | grep -E "[u]vicorn.*main:app"
 ```
 
 ### View application logs
+
 ```bash
 tail -f /tmp/verbatim-ai.log
 ```
 
 ### View nginx logs
+
 ```bash
 # Access logs
 tail -f /var/log/nginx/app.quz.ma-access.log
@@ -438,6 +480,7 @@ tail -f /var/log/nginx/app.quz.ma-error.log
 ```
 
 ### Test endpoints
+
 ```bash
 # Health check
 curl http://localhost:8000/health
@@ -457,13 +500,16 @@ curl -X POST http://localhost:8000/api/transcript \
 ## Pro Tips
 
 ### Tip 1: Always check before pulling
+
 ```bash
 git status  # See local changes
 git fetch && git log HEAD..origin/main --oneline  # See what's new
 ```
 
 ### Tip 2: Use descriptive commit messages
+
 Follow this format:
+
 ```
 [Type] Short description (50 chars max)
 
@@ -477,7 +523,9 @@ Longer explanation if needed (wrap at 72 chars)
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 ### Tip 3: Create aliases for common commands
+
 Add to `~/.bashrc` or `~/.bash_aliases`:
+
 ```bash
 alias gst='git status'
 alias gp='git pull origin main'
@@ -490,7 +538,9 @@ alias restart-app='pkill -9 -f uvicorn && nohup bash start.sh > /tmp/verbatim-ai
 Then run: `source ~/.bashrc`
 
 ### Tip 4: Set up systemd service for auto-restart
+
 Instead of manually restarting, create a systemd service:
+
 ```bash
 sudo nano /etc/systemd/system/verbatim-ai.service
 ```
@@ -513,6 +563,7 @@ WantedBy=multi-user.target
 ```
 
 Then:
+
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable verbatim-ai
@@ -521,6 +572,7 @@ sudo systemctl status verbatim-ai
 ```
 
 To restart after pulling:
+
 ```bash
 git pull origin main
 sudo systemctl restart verbatim-ai
@@ -531,16 +583,19 @@ sudo systemctl restart verbatim-ai
 ## Summary
 
 **Local Development → GitHub:**
+
 ```bash
 git add . && git commit -m "Message" && git push
 ```
 
 **GitHub → Production Server:**
+
 ```bash
 git stash && git pull && pip install -r requirements.txt && restart app
 ```
 
 **Always verify:**
+
 ```bash
 curl https://app.quz.ma/verbatim-ai/health
 ```
