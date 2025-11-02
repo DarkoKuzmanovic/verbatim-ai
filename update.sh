@@ -9,7 +9,7 @@ set -e
 # --- Configuration ---
 APP_DIR="/var/www/app.quz.ma/verbatim-ai"
 LOG_FILE="/tmp/verbatim-ai.log"
-HEALTH_CHECK_URL_LOCAL="http://localhost:8000/health"
+HEALTH_CHECK_URL_LOCAL="http://localhost:8001/health"
 HEALTH_CHECK_URL_PUBLIC="https://app.quz.ma/verbatim-ai/health"
 
 # --- Script Logic ---
@@ -79,10 +79,16 @@ else
 fi
 
 # 6. Restart the application
-print_status "Restarting the application..."
-pkill -9 -f "uvicorn.*main:app" || print_warning "No running uvicorn process found to kill."
-nohup bash start.sh > "$LOG_FILE" 2>&1 &
-print_success "Application restart initiated."
+print_status "Restarting the application with PM2..."
+if command -v pm2 &> /dev/null; then
+  pm2 restart verbatim-ai --update-env
+  print_success "Application restarted via PM2."
+else
+  print_warning "PM2 not found. Using fallback method..."
+  pkill -9 -f "uvicorn.*main:app" || print_warning "No running uvicorn process found to kill."
+  nohup bash start.sh > "$LOG_FILE" 2>&1 &
+  print_success "Application restart initiated."
+fi
 
 # 7. Verify it's working
 print_status "Waiting for the application to start..."

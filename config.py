@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'
+        extra = 'ignore'  # Allow extra fields in .env that aren't in Settings
 
 # Create a single, validated instance of the settings that can be imported by other modules.
 # This instance is named 'Config' for backward compatibility with existing imports.
